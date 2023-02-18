@@ -27,17 +27,17 @@ public class InMemoryItemRepository {
     }
 
     public Item saveItem(Item item) {
-        Item savingItem = item.withId(currentId++);
-        items.put(savingItem.getId(), savingItem);
-        Set<Integer> ownerItems = owners.get(savingItem.getOwner().getId());
+        item.setId(currentId++);
+        items.put(item.getId(), item);
+        Set<Integer> ownerItems = owners.get(item.getOwner().getId());
         if (ownerItems == null) {
             ownerItems = new HashSet<>();
-            ownerItems.add(savingItem.getId());
-            owners.put(savingItem.getOwner().getId(), ownerItems);
+            ownerItems.add(item.getId());
+            owners.put(item.getOwner().getId(), ownerItems);
         } else {
-            ownerItems.add(savingItem.getId());
+            ownerItems.add(item.getId());
         }
-        return savingItem;
+        return item;
     }
 
     public Item updateItem(Item item) {

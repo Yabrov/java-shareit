@@ -29,10 +29,10 @@ public class InMemoryUserRepository {
         if (emails.containsKey(user.getEmail())) {
             throw new EmailUniqueViolationException(user.getEmail());
         }
-        User savingUser = user.withId(currentId++);
-        users.put(savingUser.getId(), savingUser);
-        emails.put(savingUser.getEmail(), savingUser.getId());
-        return savingUser;
+        user.setId(currentId++);
+        users.put(user.getId(), user);
+        emails.put(user.getEmail(), user.getId());
+        return user;
     }
 
     public User updateUser(User user) {
