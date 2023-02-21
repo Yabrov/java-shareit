@@ -4,6 +4,7 @@ import org.springframework.stereotype.Repository;
 import ru.practicum.shareit.item.model.Item;
 
 import java.util.*;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 @Repository
@@ -18,9 +19,8 @@ public class InMemoryItemRepository {
     }
 
     public Item deleteItem(Integer itemId) {
-        Item deletedItem = findItemById(itemId);
+        Item deletedItem = items.remove(itemId);
         if (deletedItem != null) {
-            items.remove(deletedItem.getId());
             owners.get(deletedItem.getOwner().getId()).remove(deletedItem.getId());
         }
         return deletedItem;
@@ -58,7 +58,11 @@ public class InMemoryItemRepository {
                 .values()
                 .stream()
                 .filter(Item::getAvailable)
-                .filter(item -> (item.getName() + item.getDescription()).toLowerCase().contains(text))
+                .filter(getItemSerchPredicate(text))
                 .collect(Collectors.toList());
+    }
+
+    private Predicate<Item> getItemSerchPredicate(String pattern) {
+        return item -> (item.getName() + item.getDescription()).toLowerCase().contains(pattern.toLowerCase());
     }
 }

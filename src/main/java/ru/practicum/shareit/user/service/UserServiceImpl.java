@@ -6,10 +6,10 @@ import org.springframework.core.convert.converter.Converter;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.user.User;
 import ru.practicum.shareit.user.dto.UserDto;
-import ru.practicum.shareit.user.exception.NullEmailException;
 import ru.practicum.shareit.user.exception.UserNotFoundException;
 import ru.practicum.shareit.user.repository.InMemoryUserRepository;
 
+import javax.validation.constraints.NotNull;
 import java.util.Collection;
 import java.util.stream.Collectors;
 
@@ -20,6 +20,7 @@ public class UserServiceImpl implements UserService {
 
     private final InMemoryUserRepository userRepository;
     private final Converter<User, UserDto> userMapper;
+    private final Converter<UserDto, User> userDtoMapper;
 
     public UserDto findUserById(Integer userId) {
         User user = userRepository.findUserById(userId);
@@ -34,37 +35,23 @@ public class UserServiceImpl implements UserService {
         if (user == null) {
             throw new UserNotFoundException(userId);
         }
-        User newUser = User
-                .builder()
-                .id(userId)
-                .name(userDto.getName() == null ? user.getName() : userDto.getName())
-                .email(userDto.getEmail() == null ? user.getEmail() : userDto.getEmail())
-                .build();
+        User newUser = userDtoMapper.convert(userDto);
+        newUser.setId(userId);
+        newUser.setName(userDto.getName() == null ? user.getName() : userDto.getName());
+        newUser.setEmail(userDto.getEmail() == null ? user.getEmail() : userDto.getEmail());
         User updatedUser = userRepository.updateUser(newUser);
         log.info("User with id {} updated.", userId);
         return userMapper.convert(updatedUser);
     }
 
-    public UserDto createUser(UserDto userDto) {
-        if (userDto.getEmail() == null) {
-            throw new NullEmailException();
-        }
-        User user = User
-                .builder()
-                .name(userDto.getName())
-                .email(userDto.getEmail())
-                .build();
-        User savedUser = userRepository.saveUser(user);
+    public UserDto createUser(@NotNull UserDto userDto) {
+        User savedUser = userRepository.saveUser(userDtoMapper.convert(userDto));
         log.info("User with id {} saved.", savedUser.getId());
         return userMapper.convert(savedUser);
     }
 
     public UserDto deleteUser(Integer userId) {
-        User user = userRepository.findUserById(userId);
-        if (user == null) {
-            throw new UserNotFoundException(userId);
-        }
-        User deletedUser = userRepository.deleteUser(user);
+        User deletedUser = userRepository.deleteUser(userId);
         log.info("User with id {} deleted.", userId);
         return userMapper.convert(deletedUser);
     }

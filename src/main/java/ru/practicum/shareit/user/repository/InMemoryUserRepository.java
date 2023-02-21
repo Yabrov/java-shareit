@@ -19,10 +19,10 @@ public class InMemoryUserRepository {
         return users.get(id);
     }
 
-    public User deleteUser(User user) {
-        users.remove(user.getId());
-        emails.remove(user.getEmail());
-        return user;
+    public User deleteUser(Integer userId) {
+        User deletedUser = users.get(userId);
+        emails.remove(deletedUser.getEmail());
+        return users.remove(userId);
     }
 
     public User saveUser(User user) {

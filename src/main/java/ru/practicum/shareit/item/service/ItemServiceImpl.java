@@ -5,7 +5,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.item.dto.ItemDto;
-import ru.practicum.shareit.item.exceptions.ItemCreateException;
 import ru.practicum.shareit.item.exceptions.ItemNotFoundException;
 import ru.practicum.shareit.item.exceptions.WrongItemOwnerException;
 import ru.practicum.shareit.item.model.Item;
@@ -26,6 +25,7 @@ public class ItemServiceImpl implements ItemService {
     private final InMemoryUserRepository userRepository;
     private final InMemoryItemRepository itemRepository;
     private final Converter<Item, ItemDto> itemMapper;
+    private final Converter<ItemDto, Item> itemDtoMapper;
 
     @Override
     public ItemDto getItem(Integer itemId) {
@@ -42,22 +42,8 @@ public class ItemServiceImpl implements ItemService {
         if (owner == null) {
             throw new UserNotFoundException(userId);
         }
-        if (itemDto.getAvailable() == null) {
-            throw new ItemCreateException("Item availability is required.");
-        }
-        if (itemDto.getName() == null || itemDto.getName().isEmpty()) {
-            throw new ItemCreateException("Item create with empty name.");
-        }
-        if (itemDto.getDescription() == null || itemDto.getDescription().isEmpty()) {
-            throw new ItemCreateException("Item create with empty description.");
-        }
-        Item item = Item
-                .builder()
-                .name(itemDto.getName())
-                .description(itemDto.getDescription())
-                .available(itemDto.getAvailable())
-                .owner(owner)
-                .build();
+        Item item = itemDtoMapper.convert(itemDto);
+        item.setOwner(owner);
         Item savedItem = itemRepository.saveItem(item);
         log.info("Item with id {} saved.", savedItem.getId());
         return itemMapper.convert(savedItem);
@@ -122,7 +108,7 @@ public class ItemServiceImpl implements ItemService {
         return text.isEmpty()
                 ? Collections.emptyList()
                 : itemRepository
-                .searchItem(text.toLowerCase())
+                .searchItem(text)
                 .stream()
                 .map(itemMapper::convert)
                 .collect(Collectors.toList());

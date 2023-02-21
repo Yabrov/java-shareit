@@ -7,7 +7,6 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import ru.practicum.shareit.user.exception.EmailUniqueViolationException;
-import ru.practicum.shareit.user.exception.NullEmailException;
 import ru.practicum.shareit.user.exception.UserNotFoundException;
 
 @RestControllerAdvice
@@ -31,13 +30,6 @@ public class UserExceptionController {
     @ExceptionHandler(MethodArgumentNotValidException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public String validationExceptionHandler(MethodArgumentNotValidException e) {
-        return e.getMessage();
-    }
-
-    @ResponseBody
-    @ExceptionHandler(NullEmailException.class)
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public String nullEmailExceptionHandler(NullEmailException e) {
         return e.getMessage();
     }
 
