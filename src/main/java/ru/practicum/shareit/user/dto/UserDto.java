@@ -5,8 +5,10 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 import javax.validation.constraints.Email;
+import javax.validation.constraints.NotNull;
 
 @Getter
+@NotNull
 @AllArgsConstructor
 public class UserDto {
 
@@ -17,6 +19,7 @@ public class UserDto {
     private String name;
 
     @Email
+    @NotNull
     @JsonProperty("email")
     private String email;
 }
