@@ -16,34 +16,34 @@ public class ItemController {
     private final ItemService itemService;
 
     @GetMapping("/{itemId}")
-    public ItemDto getItem(@PathVariable Integer itemId) {
+    public ItemDto getItem(@PathVariable Long itemId) {
         return itemService.getItem(itemId);
     }
 
     @PostMapping()
     public ItemDto createItem(
-            @RequestHeader("X-Sharer-User-Id") Integer userId,
+            @RequestHeader("X-Sharer-User-Id") Long userId,
             @RequestBody @Valid ItemDto itemDto) {
         return itemService.createItem(userId, itemDto);
     }
 
     @PatchMapping("/{itemId}")
     public ItemDto updateItem(
-            @RequestHeader("X-Sharer-User-Id") Integer userId,
-            @PathVariable Integer itemId,
+            @RequestHeader("X-Sharer-User-Id") Long userId,
+            @PathVariable Long itemId,
             @RequestBody ItemDto itemDto) {
         return itemService.updateItem(userId, itemId, itemDto);
     }
 
     @DeleteMapping("/{itemId}")
     public ItemDto deleteItem(
-            @RequestHeader("X-Sharer-User-Id") Integer userId,
-            @PathVariable Integer itemId) {
+            @RequestHeader("X-Sharer-User-Id") Long userId,
+            @PathVariable Long itemId) {
         return itemService.deleteItem(userId, itemId);
     }
 
     @GetMapping
-    public Collection<ItemDto> getAllItems(@RequestHeader("X-Sharer-User-Id") Integer userId) {
+    public Collection<ItemDto> getAllItems(@RequestHeader("X-Sharer-User-Id") Long userId) {
         return itemService.getAllItems(userId);
     }
 

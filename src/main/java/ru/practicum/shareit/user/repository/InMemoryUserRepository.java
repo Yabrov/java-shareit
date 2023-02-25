@@ -11,15 +11,15 @@ import java.util.Map;
 @Repository
 public class InMemoryUserRepository {
 
-    private final Map<Integer, User> users = new HashMap<>();
-    private final Map<String, Integer> emails = new HashMap<>();
-    private Integer currentId = 1;
+    private final Map<Long, User> users = new HashMap<>();
+    private final Map<String, Long> emails = new HashMap<>();
+    private Long currentId = 1L;
 
-    public User findUserById(Integer id) {
+    public User findUserById(Long id) {
         return users.get(id);
     }
 
-    public User deleteUser(Integer userId) {
+    public User deleteUser(Long userId) {
         User deletedUser = users.get(userId);
         emails.remove(deletedUser.getEmail());
         return users.remove(userId);

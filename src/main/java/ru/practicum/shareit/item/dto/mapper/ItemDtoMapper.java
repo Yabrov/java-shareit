@@ -10,13 +10,12 @@ public class ItemDtoMapper implements Converter<ItemDto, Item> {
 
     @Override
     public Item convert(ItemDto source) {
-        return Item
-                .builder()
-                .id(null)
-                .name(source.getName())
-                .description(source.getDescription())
-                .available(source.getAvailable())
-                .owner(null)
-                .build();
+        Item item = new Item();
+        item.setId(null);
+        item.setName(source.getName());
+        item.setDescription(source.getDescription());
+        item.setAvailable(source.getAvailable());
+        item.setOwner(null);
+        return item;
     }
 }

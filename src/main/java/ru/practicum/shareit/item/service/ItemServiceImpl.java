@@ -28,7 +28,7 @@ public class ItemServiceImpl implements ItemService {
     private final Converter<ItemDto, Item> itemDtoMapper;
 
     @Override
-    public ItemDto getItem(Integer itemId) {
+    public ItemDto getItem(Long itemId) {
         Item item = itemRepository.findItemById(itemId);
         if (item == null) {
             throw new ItemNotFoundException(itemId);
@@ -37,7 +37,7 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public ItemDto createItem(Integer userId, ItemDto itemDto) {
+    public ItemDto createItem(Long userId, ItemDto itemDto) {
         User owner = userRepository.findUserById(userId);
         if (owner == null) {
             throw new UserNotFoundException(userId);
@@ -50,7 +50,7 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public ItemDto updateItem(Integer userId, Integer itemId, ItemDto itemDto) {
+    public ItemDto updateItem(Long userId, Long itemId, ItemDto itemDto) {
         User owner = userRepository.findUserById(userId);
         if (owner == null) {
             throw new UserNotFoundException(userId);
@@ -77,7 +77,7 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public ItemDto deleteItem(Integer userId, Integer itemId) {
+    public ItemDto deleteItem(Long userId, Long itemId) {
         User owner = userRepository.findUserById(userId);
         if (owner == null) {
             throw new UserNotFoundException(userId);
@@ -95,7 +95,7 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public Collection<ItemDto> getAllItems(Integer userId) {
+    public Collection<ItemDto> getAllItems(Long userId) {
         return itemRepository
                 .findAllItems(userId)
                 .stream()

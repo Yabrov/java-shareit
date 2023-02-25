@@ -10,15 +10,15 @@ import java.util.stream.Collectors;
 @Repository
 public class InMemoryItemRepository {
 
-    private final Map<Integer, Item> items = new HashMap<>();
-    private final Map<Integer, Set<Integer>> owners = new HashMap<>();
-    private Integer currentId = 1;
+    private final Map<Long, Item> items = new HashMap<>();
+    private final Map<Long, Set<Long>> owners = new HashMap<>();
+    private Long currentId = 1L;
 
-    public Item findItemById(Integer itemId) {
+    public Item findItemById(Long itemId) {
         return items.get(itemId);
     }
 
-    public Item deleteItem(Integer itemId) {
+    public Item deleteItem(Long itemId) {
         Item deletedItem = items.remove(itemId);
         if (deletedItem != null) {
             owners.get(deletedItem.getOwner().getId()).remove(deletedItem.getId());
@@ -29,7 +29,7 @@ public class InMemoryItemRepository {
     public Item saveItem(Item item) {
         item.setId(currentId++);
         items.put(item.getId(), item);
-        Set<Integer> ownerItems = owners.get(item.getOwner().getId());
+        Set<Long> ownerItems = owners.get(item.getOwner().getId());
         if (ownerItems == null) {
             ownerItems = new HashSet<>();
             ownerItems.add(item.getId());
@@ -45,7 +45,7 @@ public class InMemoryItemRepository {
         return item;
     }
 
-    public Collection<Item> findAllItems(Integer userId) {
+    public Collection<Item> findAllItems(Long userId) {
         return owners
                 .get(userId)
                 .stream()

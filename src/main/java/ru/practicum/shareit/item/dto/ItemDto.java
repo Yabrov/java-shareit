@@ -13,7 +13,7 @@ import javax.validation.constraints.NotNull;
 public class ItemDto {
 
     @JsonProperty("id")
-    private Integer id;
+    private Long id;
 
     @NotNull
     @NotEmpty
@@ -30,5 +30,5 @@ public class ItemDto {
     private Boolean available;
 
     @JsonProperty("requestId")
-    private Integer requestId;
+    private Long requestId;
 }

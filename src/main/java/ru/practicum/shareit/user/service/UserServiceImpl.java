@@ -22,7 +22,7 @@ public class UserServiceImpl implements UserService {
     private final Converter<User, UserDto> userMapper;
     private final Converter<UserDto, User> userDtoMapper;
 
-    public UserDto findUserById(Integer userId) {
+    public UserDto findUserById(Long userId) {
         User user = userRepository.findUserById(userId);
         if (user == null) {
             throw new UserNotFoundException(userId);
@@ -30,7 +30,7 @@ public class UserServiceImpl implements UserService {
         return userMapper.convert(user);
     }
 
-    public UserDto updateUser(Integer userId, UserDto userDto) {
+    public UserDto updateUser(Long userId, UserDto userDto) {
         User user = userRepository.findUserById(userId);
         if (user == null) {
             throw new UserNotFoundException(userId);
@@ -50,7 +50,7 @@ public class UserServiceImpl implements UserService {
         return userMapper.convert(savedUser);
     }
 
-    public UserDto deleteUser(Integer userId) {
+    public UserDto deleteUser(Long userId) {
         User deletedUser = userRepository.deleteUser(userId);
         log.info("User with id {} deleted.", userId);
         return userMapper.convert(deletedUser);
