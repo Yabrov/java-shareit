@@ -1,7 +1,9 @@
 package ru.practicum.shareit.user;
 
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.DynamicUpdate;
 import ru.practicum.shareit.booking.Booking;
 import ru.practicum.shareit.config.BaseEntity;
 import ru.practicum.shareit.item.model.Comment;
@@ -13,34 +15,15 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Entity
+@Getter
 @Setter
+@DynamicUpdate
 @NoArgsConstructor
 @Table(name = "users")
 public class User extends BaseEntity<Long> {
 
-    private String name;
-    private String email;
-    private List<Item> items = new ArrayList<>();
-    private List<Booking> bookings = new ArrayList<>();
-    private List<ItemRequest> itemRequests = new ArrayList<>();
-    private List<Comment> comments = new ArrayList<>();
-
-    @Override
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    public Long getId() {
-        return super.getId();
-    }
-
-    @Override
-    public void setId(Long id) {
-        super.setId(id);
-    }
-
     @Column(name = "name", nullable = false)
-    public String getName() {
-        return name;
-    }
+    private String name;
 
     @Column(
             name = "email",
@@ -48,27 +31,17 @@ public class User extends BaseEntity<Long> {
             unique = true,
             nullable = false
     )
-    public String getEmail() {
-        return email;
-    }
+    private String email;
 
     @OneToMany(mappedBy = "owner", fetch = FetchType.LAZY)
-    public List<Item> getItems() {
-        return items;
-    }
+    private List<Item> items = new ArrayList<>();
 
     @OneToMany(mappedBy = "booker", fetch = FetchType.LAZY)
-    public List<Booking> getBookings() {
-        return bookings;
-    }
+    private List<Booking> bookings = new ArrayList<>();
 
     @OneToMany(mappedBy = "requestor", fetch = FetchType.LAZY)
-    public List<ItemRequest> getItemRequests() {
-        return itemRequests;
-    }
+    private List<ItemRequest> itemRequests = new ArrayList<>();
 
     @OneToMany(mappedBy = "author", fetch = FetchType.LAZY)
-    public List<Comment> getComments() {
-        return comments;
-    }
+    private List<Comment> comments = new ArrayList<>();
 }

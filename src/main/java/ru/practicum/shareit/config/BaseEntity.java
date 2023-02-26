@@ -1,25 +1,24 @@
 package ru.practicum.shareit.config;
 
+import lombok.Getter;
+import lombok.Setter;
+
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.MappedSuperclass;
 import java.io.Serializable;
 
-public abstract class BaseEntity<T> implements Serializable {
+@Getter
+@Setter
+@MappedSuperclass
+public abstract class BaseEntity<T extends Serializable> implements Serializable {
 
-    private final static Long serialVersionUID = 1L;
+    private static final Long serialVersionUID = 1L;
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     protected T id;
-
-    public T getId() {
-        return id;
-    }
-
-    public void setId(T id) {
-        this.id = id;
-    }
 
     @Override
     public int hashCode() {
