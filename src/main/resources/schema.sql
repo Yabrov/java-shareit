@@ -22,11 +22,11 @@ CREATE TABLE IF NOT EXISTS items(
     description TEXT NOT NULL,
     is_available BOOLEAN NOT NULL,
     owner_id BIGINT NOT NULL,
-    request_id BIGINT NOT NULL,
+    request_id BIGINT,
     CONSTRAINT pk_items PRIMARY KEY (id),
     CONSTRAINT items_users_fkey FOREIGN KEY (owner_id)
     REFERENCES users (id),
-    CONSTRAINT items_requests_fkey FOREIGN KEY (owner_id)
+    CONSTRAINT items_requests_fkey FOREIGN KEY (request_id)
     REFERENCES requests (id)
 );
 
