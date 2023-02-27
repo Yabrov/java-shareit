@@ -9,22 +9,25 @@ import java.util.HashMap;
 import java.util.Map;
 
 @Repository
-public class InMemoryUserRepository {
+public class InMemoryUserRepositoryImpl implements UserRepository {
 
     private final Map<Long, User> users = new HashMap<>();
     private final Map<String, Long> emails = new HashMap<>();
     private Long currentId = 1L;
 
+    @Override
     public User findUserById(Long id) {
         return users.get(id);
     }
 
+    @Override
     public User deleteUser(Long userId) {
         User deletedUser = users.get(userId);
         emails.remove(deletedUser.getEmail());
         return users.remove(userId);
     }
 
+    @Override
     public User saveUser(User user) {
         if (emails.containsKey(user.getEmail())) {
             throw new EmailUniqueViolationException(user.getEmail());
@@ -35,6 +38,7 @@ public class InMemoryUserRepository {
         return user;
     }
 
+    @Override
     public User updateUser(User user) {
         User oldUser = findUserById(user.getId());
         if (emails.containsKey(user.getEmail()) && !oldUser.getEmail().equals(user.getEmail())) {
@@ -46,6 +50,7 @@ public class InMemoryUserRepository {
         return user;
     }
 
+    @Override
     public Collection<User> findAllUsers() {
         return users.values();
     }

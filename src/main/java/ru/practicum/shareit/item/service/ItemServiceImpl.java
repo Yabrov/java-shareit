@@ -1,17 +1,19 @@
 package ru.practicum.shareit.item.service;
 
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.exceptions.ItemNotFoundException;
 import ru.practicum.shareit.item.exceptions.WrongItemOwnerException;
 import ru.practicum.shareit.item.model.Item;
-import ru.practicum.shareit.item.repository.InMemoryItemRepository;
+import ru.practicum.shareit.item.repository.ItemRepository;
 import ru.practicum.shareit.user.User;
 import ru.practicum.shareit.user.exception.UserNotFoundException;
-import ru.practicum.shareit.user.repository.InMemoryUserRepository;
+import ru.practicum.shareit.user.repository.UserRepository;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -19,13 +21,24 @@ import java.util.stream.Collectors;
 
 @Slf4j
 @Service
-@RequiredArgsConstructor
 public class ItemServiceImpl implements ItemService {
 
-    private final InMemoryUserRepository userRepository;
-    private final InMemoryItemRepository itemRepository;
+    private final UserRepository userRepository;
+    private final ItemRepository itemRepository;
     private final Converter<Item, ItemDto> itemMapper;
     private final Converter<ItemDto, Item> itemDtoMapper;
+
+    @Autowired
+    public ItemServiceImpl(
+            @Qualifier("databaseItemRepositoryImpl") ItemRepository itemRepository,
+            @Qualifier("databaseUserRepositoryImpl") UserRepository userRepository,
+            Converter<Item, ItemDto> itemMapper,
+            Converter<ItemDto, Item> itemDtoMapper) {
+        this.itemRepository = itemRepository;
+        this.userRepository = userRepository;
+        this.itemMapper = itemMapper;
+        this.itemDtoMapper = itemDtoMapper;
+    }
 
     @Override
     public ItemDto getItem(Long itemId) {
@@ -36,6 +49,7 @@ public class ItemServiceImpl implements ItemService {
         return itemMapper.convert(item);
     }
 
+    @Transactional
     @Override
     public ItemDto createItem(Long userId, ItemDto itemDto) {
         User owner = userRepository.findUserById(userId);
@@ -49,6 +63,7 @@ public class ItemServiceImpl implements ItemService {
         return itemMapper.convert(savedItem);
     }
 
+    @Transactional
     @Override
     public ItemDto updateItem(Long userId, Long itemId, ItemDto itemDto) {
         User owner = userRepository.findUserById(userId);
@@ -76,6 +91,7 @@ public class ItemServiceImpl implements ItemService {
         return itemMapper.convert(updatedItem);
     }
 
+    @Transactional
     @Override
     public ItemDto deleteItem(Long userId, Long itemId) {
         User owner = userRepository.findUserById(userId);

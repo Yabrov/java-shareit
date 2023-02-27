@@ -8,7 +8,7 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 @Repository
-public class InMemoryItemRepository {
+public class InMemoryItemRepositoryImpl implements ItemRepository {
 
     private final Map<Long, Item> items = new HashMap<>();
     private final Map<Long, Set<Long>> owners = new HashMap<>();
@@ -18,6 +18,7 @@ public class InMemoryItemRepository {
         return items.get(itemId);
     }
 
+    @Override
     public Item deleteItem(Long itemId) {
         Item deletedItem = items.remove(itemId);
         if (deletedItem != null) {
@@ -26,6 +27,7 @@ public class InMemoryItemRepository {
         return deletedItem;
     }
 
+    @Override
     public Item saveItem(Item item) {
         item.setId(currentId++);
         items.put(item.getId(), item);
@@ -40,11 +42,13 @@ public class InMemoryItemRepository {
         return item;
     }
 
+    @Override
     public Item updateItem(Item item) {
         items.replace(item.getId(), item);
         return item;
     }
 
+    @Override
     public Collection<Item> findAllItems(Long userId) {
         return owners
                 .get(userId)
@@ -53,6 +57,7 @@ public class InMemoryItemRepository {
                 .collect(Collectors.toList());
     }
 
+    @Override
     public Collection<Item> searchItem(String text) {
         return items
                 .values()
