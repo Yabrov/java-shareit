@@ -1,6 +1,7 @@
 package ru.practicum.shareit.item.repository;
 
 import org.springframework.stereotype.Repository;
+import ru.practicum.shareit.booking.Booking;
 import ru.practicum.shareit.item.model.Item;
 
 import java.util.*;
@@ -69,5 +70,15 @@ public class InMemoryItemRepositoryImpl implements ItemRepository {
 
     private Predicate<Item> getItemSerchPredicate(String pattern) {
         return item -> (item.getName() + item.getDescription()).toLowerCase().contains(pattern.toLowerCase());
+    }
+
+    @Override
+    public Booking getNextBookingByItemId(Long itemId) {
+        return null;
+    }
+
+    @Override
+    public Booking getLastBookingByItemId(Long itemId) {
+        return null;
     }
 }

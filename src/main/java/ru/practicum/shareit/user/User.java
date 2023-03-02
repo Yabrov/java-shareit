@@ -33,15 +33,15 @@ public class User extends BaseEntity<Long> {
     )
     private String email;
 
-    @OneToMany(mappedBy = "owner", fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "owner", fetch = FetchType.LAZY, cascade = CascadeType.REMOVE)
     private List<Item> items = new ArrayList<>();
 
-    @OneToMany(mappedBy = "booker", fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "booker", fetch = FetchType.LAZY, cascade = CascadeType.REMOVE)
     private List<Booking> bookings = new ArrayList<>();
 
-    @OneToMany(mappedBy = "requestor", fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "requestor", fetch = FetchType.LAZY, cascade = CascadeType.REMOVE)
     private List<ItemRequest> itemRequests = new ArrayList<>();
 
-    @OneToMany(mappedBy = "author", fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "author", fetch = FetchType.LAZY, cascade = CascadeType.REMOVE)
     private List<Comment> comments = new ArrayList<>();
 }

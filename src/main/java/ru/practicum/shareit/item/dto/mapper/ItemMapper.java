@@ -15,7 +15,9 @@ public class ItemMapper implements Converter<Item, ItemDto> {
                 source.getName(),
                 source.getDescription(),
                 source.getAvailable(),
-                source.getRequest() != null ? source.getRequest().getId() : null
+                source.getRequest() != null ? source.getRequest().getId() : null,
+                null,
+                null
         );
     }
 }

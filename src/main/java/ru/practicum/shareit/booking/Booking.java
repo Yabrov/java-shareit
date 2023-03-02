@@ -16,7 +16,10 @@ import java.time.LocalDateTime;
 @Setter
 @DynamicUpdate
 @NoArgsConstructor
-@Table(name = "bookings")
+@Table(
+        name = "bookings",
+        indexes = {@Index(name = "booking_item_id_idx", columnList = "item_id")}
+)
 public class Booking extends BaseEntity<Long> {
 
     @Column(
@@ -47,5 +50,5 @@ public class Booking extends BaseEntity<Long> {
             nullable = false
     )
     @Enumerated(value = EnumType.STRING)
-    private BookingStatus status;
+    private BookingStatus status = BookingStatus.WAITING;
 }

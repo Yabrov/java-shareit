@@ -5,8 +5,10 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import ru.practicum.shareit.config.ErrorResponse;
 import ru.practicum.shareit.item.exceptions.ItemCreateException;
 import ru.practicum.shareit.item.exceptions.ItemNotFoundException;
+import ru.practicum.shareit.item.exceptions.ItemUnavailableException;
 import ru.practicum.shareit.item.exceptions.WrongItemOwnerException;
 
 @RestControllerAdvice
@@ -15,21 +17,28 @@ public class ItemExceptionController {
     @ResponseBody
     @ExceptionHandler(ItemNotFoundException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
-    public String itemNotFoundExceptionHandler(ItemNotFoundException e) {
-        return e.getMessage();
+    public ErrorResponse itemNotFoundExceptionHandler(ItemNotFoundException e) {
+        return new ErrorResponse(e.getMessage());
     }
 
     @ResponseBody
     @ExceptionHandler(ItemCreateException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public String itemCreateExceptionHandler(ItemCreateException e) {
-        return e.getMessage();
+    public ErrorResponse itemCreateExceptionHandler(ItemCreateException e) {
+        return new ErrorResponse(e.getMessage());
+    }
+
+    @ResponseBody
+    @ExceptionHandler(ItemUnavailableException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ErrorResponse itemUnavailableExceptionHandler(ItemUnavailableException e) {
+        return new ErrorResponse(e.getMessage());
     }
 
     @ResponseBody
     @ExceptionHandler(WrongItemOwnerException.class)
     @ResponseStatus(HttpStatus.FORBIDDEN)
-    public String wrongItemOwnerExceptionHandler(WrongItemOwnerException e) {
-        return e.getMessage();
+    public ErrorResponse wrongItemOwnerExceptionHandler(WrongItemOwnerException e) {
+        return new ErrorResponse(e.getMessage());
     }
 }

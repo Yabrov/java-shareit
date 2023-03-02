@@ -16,8 +16,10 @@ public class ItemController {
     private final ItemService itemService;
 
     @GetMapping("/{itemId}")
-    public ItemDto getItem(@PathVariable Long itemId) {
-        return itemService.getItem(itemId);
+    public ItemDto getItem(
+            @RequestHeader(value = "X-Sharer-User-Id", required = false) Long userId,
+            @PathVariable Long itemId) {
+        return itemService.getItem(userId, itemId);
     }
 
     @PostMapping()

@@ -6,6 +6,8 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import ru.practicum.shareit.booking.Booking;
+import ru.practicum.shareit.booking.dto.BookingLinkedDto;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.exceptions.ItemNotFoundException;
 import ru.practicum.shareit.item.exceptions.WrongItemOwnerException;
@@ -27,24 +29,36 @@ public class ItemServiceImpl implements ItemService {
     private final ItemRepository itemRepository;
     private final Converter<Item, ItemDto> itemMapper;
     private final Converter<ItemDto, Item> itemDtoMapper;
+    private final Converter<Booking, BookingLinkedDto> bookingMapper;
 
     @Autowired
     public ItemServiceImpl(
             @Qualifier("databaseItemRepositoryImpl") ItemRepository itemRepository,
             @Qualifier("databaseUserRepositoryImpl") UserRepository userRepository,
             Converter<Item, ItemDto> itemMapper,
+            Converter<Booking, BookingLinkedDto> bookingMapper,
             Converter<ItemDto, Item> itemDtoMapper) {
         this.itemRepository = itemRepository;
         this.userRepository = userRepository;
         this.itemMapper = itemMapper;
         this.itemDtoMapper = itemDtoMapper;
+        this.bookingMapper = bookingMapper;
     }
 
     @Override
-    public ItemDto getItem(Long itemId) {
+    public ItemDto getItem(Long userId, Long itemId) {
         Item item = itemRepository.findItemById(itemId);
         if (item == null) {
             throw new ItemNotFoundException(itemId);
+        }
+        if (userId != null) {
+            User user = userRepository.findUserById(userId);
+            if (user == null) {
+                throw new UserNotFoundException(userId);
+            }
+            if (item.getOwner().equals(user)) {
+                return addNextAndLastBooking(itemMapper.convert(item));
+            }
         }
         return itemMapper.convert(item);
     }
@@ -60,7 +74,7 @@ public class ItemServiceImpl implements ItemService {
         item.setOwner(owner);
         Item savedItem = itemRepository.saveItem(item);
         log.info("Item with id {} saved.", savedItem.getId());
-        return itemMapper.convert(savedItem);
+        return addNextAndLastBooking(itemMapper.convert(savedItem));
     }
 
     @Transactional
@@ -88,7 +102,7 @@ public class ItemServiceImpl implements ItemService {
         }
         Item updatedItem = itemRepository.updateItem(item);
         log.info("Item with id {} updated.", item.getId());
-        return itemMapper.convert(updatedItem);
+        return addNextAndLastBooking(itemMapper.convert(updatedItem));
     }
 
     @Transactional
@@ -107,7 +121,7 @@ public class ItemServiceImpl implements ItemService {
         }
         Item deletedItem = itemRepository.deleteItem(itemId);
         log.info("Item with id {} deleted.", itemId);
-        return itemMapper.convert(deletedItem);
+        return addNextAndLastBooking(itemMapper.convert(deletedItem));
     }
 
     @Override
@@ -115,7 +129,9 @@ public class ItemServiceImpl implements ItemService {
         return itemRepository
                 .findAllItems(userId)
                 .stream()
+                .filter(Item::getAvailable)
                 .map(itemMapper::convert)
+                .map(this::addNextAndLastBooking)
                 .collect(Collectors.toList());
     }
 
@@ -126,7 +142,22 @@ public class ItemServiceImpl implements ItemService {
                 : itemRepository
                 .searchItem(text)
                 .stream()
+                .filter(Item::getAvailable)
                 .map(itemMapper::convert)
+                .map(this::addNextAndLastBooking)
                 .collect(Collectors.toList());
+    }
+
+    private ItemDto addNextAndLastBooking(ItemDto itemDto) {
+        if (itemDto == null) return null;
+        Booking nextBooking = itemRepository.getNextBookingByItemId(itemDto.getId());
+        if (nextBooking != null) {
+            itemDto.setNextBooking(bookingMapper.convert(nextBooking));
+        }
+        Booking lastBooking = itemRepository.getLastBookingByItemId(itemDto.getId());
+        if (lastBooking != null) {
+            itemDto.setLastBooking(bookingMapper.convert(lastBooking));
+        }
+        return itemDto;
     }
 }

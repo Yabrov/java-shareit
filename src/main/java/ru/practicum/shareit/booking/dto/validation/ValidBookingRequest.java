@@ -5,10 +5,10 @@ import javax.validation.Payload;
 import java.lang.annotation.*;
 
 @Documented
-@Constraint(validatedBy = BookingDtoValidator.class)
+@Constraint(validatedBy = BookingRequestValidator.class)
 @Target({ElementType.TYPE})
 @Retention(RetentionPolicy.RUNTIME)
-public @interface ValidBooking {
+public @interface ValidBookingRequest {
 
     String message() default "date end must be after date start";
 
