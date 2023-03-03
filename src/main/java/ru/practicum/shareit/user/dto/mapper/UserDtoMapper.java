@@ -10,10 +10,11 @@ public class UserDtoMapper implements Converter<UserDto, User> {
 
     @Override
     public User convert(UserDto source) {
-        User user = new User();
-        user.setId(null);
-        user.setName(source.getName());
-        user.setEmail(source.getEmail());
-        return user;
+        return User
+                .builder()
+                .id(null)
+                .name(source.getName())
+                .email(source.getEmail())
+                .build();
     }
 }

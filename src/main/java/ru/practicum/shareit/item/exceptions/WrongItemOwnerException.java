@@ -4,7 +4,7 @@ public class WrongItemOwnerException extends RuntimeException {
 
     private static final String MES_PATTERN = "User with id %s is not owner of item with id %s";
 
-    public WrongItemOwnerException(Long userId, Long itemId) {
+    public WrongItemOwnerException(Integer userId, Integer itemId) {
         super(String.format(MES_PATTERN, userId, itemId));
     }
 }

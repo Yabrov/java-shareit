@@ -13,7 +13,7 @@ import javax.validation.constraints.NotNull;
 public class UserDto {
 
     @JsonProperty("id")
-    private Long id;
+    private Integer id;
 
     @JsonProperty("name")
     private String name;

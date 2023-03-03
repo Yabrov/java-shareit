@@ -3,12 +3,9 @@ package ru.practicum.shareit.item.dto;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
-import lombok.Setter;
-import ru.practicum.shareit.booking.dto.BookingLinkedDto;
 
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
-import java.util.Collection;
 
 @Getter
 @NotNull
@@ -16,7 +13,7 @@ import java.util.Collection;
 public class ItemDto {
 
     @JsonProperty("id")
-    private Long id;
+    private Integer id;
 
     @NotNull
     @NotEmpty
@@ -33,16 +30,5 @@ public class ItemDto {
     private Boolean available;
 
     @JsonProperty("requestId")
-    private Long requestId;
-
-    @Setter
-    @JsonProperty("lastBooking")
-    private BookingLinkedDto lastBooking;
-
-    @Setter
-    @JsonProperty("nextBooking")
-    private BookingLinkedDto nextBooking;
-
-    @JsonProperty("comments")
-    private Collection<CommentDto> comments;
+    private Integer requestId;
 }
