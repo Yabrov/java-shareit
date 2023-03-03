@@ -1,16 +1,18 @@
 package ru.practicum.shareit.item.service;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.booking.Booking;
 import ru.practicum.shareit.booking.dto.BookingLinkedDto;
+import ru.practicum.shareit.item.dto.CommentDto;
 import ru.practicum.shareit.item.dto.ItemDto;
+import ru.practicum.shareit.item.exceptions.CommentCreateException;
 import ru.practicum.shareit.item.exceptions.ItemNotFoundException;
 import ru.practicum.shareit.item.exceptions.WrongItemOwnerException;
+import ru.practicum.shareit.item.model.Comment;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.repository.ItemRepository;
 import ru.practicum.shareit.user.User;
@@ -23,6 +25,7 @@ import java.util.stream.Collectors;
 
 @Slf4j
 @Service
+@RequiredArgsConstructor
 public class ItemServiceImpl implements ItemService {
 
     private final UserRepository userRepository;
@@ -30,20 +33,8 @@ public class ItemServiceImpl implements ItemService {
     private final Converter<Item, ItemDto> itemMapper;
     private final Converter<ItemDto, Item> itemDtoMapper;
     private final Converter<Booking, BookingLinkedDto> bookingMapper;
-
-    @Autowired
-    public ItemServiceImpl(
-            @Qualifier("databaseItemRepositoryImpl") ItemRepository itemRepository,
-            @Qualifier("databaseUserRepositoryImpl") UserRepository userRepository,
-            Converter<Item, ItemDto> itemMapper,
-            Converter<Booking, BookingLinkedDto> bookingMapper,
-            Converter<ItemDto, Item> itemDtoMapper) {
-        this.itemRepository = itemRepository;
-        this.userRepository = userRepository;
-        this.itemMapper = itemMapper;
-        this.itemDtoMapper = itemDtoMapper;
-        this.bookingMapper = bookingMapper;
-    }
+    private final Converter<Comment, CommentDto> commentMapper;
+    private final Converter<CommentDto, Comment> commentDtoMapper;
 
     @Override
     public ItemDto getItem(Long userId, Long itemId) {
@@ -51,16 +42,20 @@ public class ItemServiceImpl implements ItemService {
         if (item == null) {
             throw new ItemNotFoundException(itemId);
         }
+        ItemDto itemDto = itemMapper.convert(item);
         if (userId != null) {
             User user = userRepository.findUserById(userId);
             if (user == null) {
                 throw new UserNotFoundException(userId);
             }
             if (item.getOwner().equals(user)) {
-                return addNextAndLastBooking(itemMapper.convert(item));
+                itemDto = addNextAndLastBooking(addComments(itemDto));
             }
         }
-        return itemMapper.convert(item);
+        if (Boolean.TRUE.equals(itemRepository.isUserCommentatorOfItem(itemId, userId))) {
+            itemDto = addComments(itemDto);
+        }
+        return itemDto;
     }
 
     @Transactional
@@ -74,7 +69,7 @@ public class ItemServiceImpl implements ItemService {
         item.setOwner(owner);
         Item savedItem = itemRepository.saveItem(item);
         log.info("Item with id {} saved.", savedItem.getId());
-        return addNextAndLastBooking(itemMapper.convert(savedItem));
+        return addNextAndLastBooking(addComments(itemMapper.convert(savedItem)));
     }
 
     @Transactional
@@ -102,7 +97,7 @@ public class ItemServiceImpl implements ItemService {
         }
         Item updatedItem = itemRepository.updateItem(item);
         log.info("Item with id {} updated.", item.getId());
-        return addNextAndLastBooking(itemMapper.convert(updatedItem));
+        return addNextAndLastBooking(addComments(itemMapper.convert(updatedItem)));
     }
 
     @Transactional
@@ -121,7 +116,7 @@ public class ItemServiceImpl implements ItemService {
         }
         Item deletedItem = itemRepository.deleteItem(itemId);
         log.info("Item with id {} deleted.", itemId);
-        return addNextAndLastBooking(itemMapper.convert(deletedItem));
+        return addNextAndLastBooking(addComments(itemMapper.convert(deletedItem)));
     }
 
     @Override
@@ -132,6 +127,7 @@ public class ItemServiceImpl implements ItemService {
                 .filter(Item::getAvailable)
                 .map(itemMapper::convert)
                 .map(this::addNextAndLastBooking)
+                .map(this::addComments)
                 .collect(Collectors.toList());
     }
 
@@ -144,8 +140,26 @@ public class ItemServiceImpl implements ItemService {
                 .stream()
                 .filter(Item::getAvailable)
                 .map(itemMapper::convert)
-                .map(this::addNextAndLastBooking)
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public CommentDto createComment(Long userId, Long itemId, CommentDto commentDto) {
+        User author = userRepository.findUserById(userId);
+        if (author == null) {
+            throw new UserNotFoundException(userId);
+        }
+        Item item = itemRepository.findItemById(itemId);
+        if (item == null) {
+            throw new ItemNotFoundException(itemId);
+        }
+        if (Boolean.FALSE.equals(itemRepository.isUserRealBookerOfItem(itemId, userId))) {
+            throw new CommentCreateException("You are not allowed to comment item id " + itemId);
+        }
+        Comment comment = commentDtoMapper.convert(commentDto);
+        comment.setItem(item);
+        comment.setAuthor(author);
+        return commentMapper.convert(itemRepository.createComment(comment));
     }
 
     private ItemDto addNextAndLastBooking(ItemDto itemDto) {
@@ -158,6 +172,17 @@ public class ItemServiceImpl implements ItemService {
         if (lastBooking != null) {
             itemDto.setLastBooking(bookingMapper.convert(lastBooking));
         }
+        return itemDto;
+    }
+
+    private ItemDto addComments(ItemDto itemDto) {
+        if (itemDto == null) return null;
+        Collection<CommentDto> comments = itemRepository
+                .findAllItemComments(itemDto.getId())
+                .stream()
+                .map(commentMapper::convert)
+                .collect(Collectors.toList());
+        itemDto.getComments().addAll(comments);
         return itemDto;
     }
 }

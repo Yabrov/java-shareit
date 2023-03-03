@@ -5,7 +5,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import ru.practicum.shareit.booking.Booking;
 import ru.practicum.shareit.booking.BookingStatus;
-import ru.practicum.shareit.item.model.Item;
 
 import java.time.LocalDateTime;
 import java.util.Collection;
@@ -46,13 +45,9 @@ public interface JpaBookingRepository extends JpaRepository<Booking, Long> {
             "WHERE b.item.id = :itemId AND b.status <> 'REJECTED' AND :start < b.end AND :end >= b.start")
     Integer getOverlapsBookingsCount(Long itemId, LocalDateTime start, LocalDateTime end);
 
-    @Query(value = "SELECT * FROM public.bookings " +
-            "WHERE item_id = :itemId AND start_date > now() AND status = 'APPROVED' " +
-            "ORDER BY start_date LIMIT 1", nativeQuery = true)
-    Booking findNextBookingForItem(Long itemId);
+    Booking findFirstByItem_IdAndStartIsAfterAndStatusOrderByStart(Long itemId, LocalDateTime curTime, BookingStatus status);
 
-    @Query(value = "SELECT * FROM public.bookings " +
-            "WHERE item_id = :itemId AND end_date < now() AND status = 'APPROVED' " +
-            "ORDER BY end_date LIMIT 1", nativeQuery = true)
-    Booking findLastBookingForItem(Long itemId);
+    Booking findFirstByItem_IdAndEndIsLessThanEqualAndStatusOrderByEnd(Long itemId, LocalDateTime curTime, BookingStatus status);
+
+    Integer countByItem_IdAndBooker_IdAndStatusAndEndIsBefore(Long itemId, Long bookerId, BookingStatus status, LocalDateTime curTime);
 }

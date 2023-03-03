@@ -1,6 +1,7 @@
 package ru.practicum.shareit.item.repository;
 
 import ru.practicum.shareit.booking.Booking;
+import ru.practicum.shareit.item.model.Comment;
 import ru.practicum.shareit.item.model.Item;
 
 import java.util.Collection;
@@ -22,4 +23,12 @@ public interface ItemRepository {
     Booking getNextBookingByItemId(Long itemId);
 
     Booking getLastBookingByItemId(Long itemId);
+
+    Boolean isUserRealBookerOfItem(Long itemId, Long userId);
+
+    Boolean isUserCommentatorOfItem(Long itemId, Long userId);
+
+    Comment createComment(Comment comment);
+
+    Collection<Comment> findAllItemComments(Long itemId);
 }

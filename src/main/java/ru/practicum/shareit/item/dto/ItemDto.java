@@ -5,10 +5,10 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 import ru.practicum.shareit.booking.dto.BookingLinkedDto;
-import ru.practicum.shareit.booking.dto.BookingResponseDto;
 
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
+import java.util.Collection;
 
 @Getter
 @NotNull
@@ -42,4 +42,7 @@ public class ItemDto {
     @Setter
     @JsonProperty("nextBooking")
     private BookingLinkedDto nextBooking;
+
+    @JsonProperty("comments")
+    private Collection<CommentDto> comments;
 }

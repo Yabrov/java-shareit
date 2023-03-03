@@ -10,6 +10,9 @@ public class BookingLinkedMapper implements Converter<Booking, BookingLinkedDto>
 
     @Override
     public BookingLinkedDto convert(Booking source) {
-        return new BookingLinkedDto(source.getId(), source.getBooker().getId());
+        return new BookingLinkedDto(
+                source.getId(),
+                source.getBooker() != null ? source.getBooker().getId() : null
+        );
     }
 }

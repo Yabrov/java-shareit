@@ -1,8 +1,7 @@
 package ru.practicum.shareit.user.service;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -17,21 +16,12 @@ import java.util.stream.Collectors;
 
 @Slf4j
 @Service
+@RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
     private final Converter<User, UserDto> userMapper;
     private final Converter<UserDto, User> userDtoMapper;
-
-    @Autowired
-    public UserServiceImpl(
-            @Qualifier("databaseUserRepositoryImpl") UserRepository userRepository,
-            Converter<User, UserDto> userMapper,
-            Converter<UserDto, User> userDtoMapper) {
-        this.userRepository = userRepository;
-        this.userMapper = userMapper;
-        this.userDtoMapper = userDtoMapper;
-    }
 
     @Override
     public UserDto findUserById(Long userId) {

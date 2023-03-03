@@ -6,10 +6,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import ru.practicum.shareit.config.ErrorResponse;
-import ru.practicum.shareit.item.exceptions.ItemCreateException;
-import ru.practicum.shareit.item.exceptions.ItemNotFoundException;
-import ru.practicum.shareit.item.exceptions.ItemUnavailableException;
-import ru.practicum.shareit.item.exceptions.WrongItemOwnerException;
+import ru.practicum.shareit.item.exceptions.*;
 
 @RestControllerAdvice
 public class ItemExceptionController {
@@ -39,6 +36,13 @@ public class ItemExceptionController {
     @ExceptionHandler(WrongItemOwnerException.class)
     @ResponseStatus(HttpStatus.FORBIDDEN)
     public ErrorResponse wrongItemOwnerExceptionHandler(WrongItemOwnerException e) {
+        return new ErrorResponse(e.getMessage());
+    }
+
+    @ResponseBody
+    @ExceptionHandler(CommentCreateException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ErrorResponse commentCreateExceptionHandler(CommentCreateException e) {
         return new ErrorResponse(e.getMessage());
     }
 }

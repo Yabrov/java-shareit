@@ -1,7 +1,6 @@
 package ru.practicum.shareit.booking.service;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
+import lombok.RequiredArgsConstructor;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -30,6 +29,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor
 public class BookingServiceImpl implements BookingService {
 
     private final BookingRepository bookingRepository;
@@ -37,20 +37,6 @@ public class BookingServiceImpl implements BookingService {
     private final UserRepository userRepository;
     private final Converter<Booking, BookingResponseDto> bookingResponseMapper;
     private final Converter<BookingRequestDto, Booking> bookingRequestMapper;
-
-    @Autowired
-    public BookingServiceImpl(
-            @Qualifier("databaseBookingRepositoryImpl") BookingRepository bookingRepository,
-            @Qualifier("databaseItemRepositoryImpl") ItemRepository itemRepository,
-            @Qualifier("databaseUserRepositoryImpl") UserRepository userRepository,
-            Converter<Booking, BookingResponseDto> bookingResponseMapper,
-            Converter<BookingRequestDto, Booking> bookingRequestMapper) {
-        this.bookingRepository = bookingRepository;
-        this.itemRepository = itemRepository;
-        this.userRepository = userRepository;
-        this.bookingResponseMapper = bookingResponseMapper;
-        this.bookingRequestMapper = bookingRequestMapper;
-    }
 
     @Transactional
     @Override

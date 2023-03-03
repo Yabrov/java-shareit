@@ -16,7 +16,10 @@ import java.time.LocalDateTime;
 @Setter
 @DynamicUpdate
 @NoArgsConstructor
-@Table(name = "comments")
+@Table(
+        name = "comments",
+        indexes = {@Index(name = "comment_item_id_idx", columnList = "item_id")}
+)
 public class Comment extends BaseEntity<Long> {
 
     @Column(
