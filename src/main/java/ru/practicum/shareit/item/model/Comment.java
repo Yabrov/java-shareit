@@ -1,4 +1,4 @@
-package ru.practicum.shareit.request;
+package ru.practicum.shareit.item.model;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -6,32 +6,36 @@ import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.DynamicUpdate;
 import ru.practicum.shareit.config.BaseEntity;
-import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.user.User;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
 
 @Entity
 @Getter
 @Setter
 @DynamicUpdate
 @NoArgsConstructor
-@Table(name = "requests")
-public class ItemRequest extends BaseEntity<Long> {
+@Table(
+        name = "comments",
+        indexes = {@Index(name = "comment_item_id_idx", columnList = "item_id")}
+)
+public class Comment extends BaseEntity<Long> {
 
     @Column(
-            name = "description",
+            name = "text",
             nullable = false,
             columnDefinition = "text"
     )
-    private String description;
+    private String text;
 
     @ManyToOne
-    @JoinColumn(name = "requestor_id", nullable = false)
-    private User requestor;
+    @JoinColumn(name = "author_id", nullable = false)
+    private User author;
+
+    @ManyToOne
+    @JoinColumn(name = "item_id", nullable = false)
+    private Item item;
 
     @Column(
             name = "created",
@@ -40,7 +44,4 @@ public class ItemRequest extends BaseEntity<Long> {
     )
     @CreationTimestamp
     private LocalDateTime created;
-
-    @OneToMany(mappedBy = "request", fetch = FetchType.LAZY)
-    private List<Item> items = new ArrayList<>();
 }
