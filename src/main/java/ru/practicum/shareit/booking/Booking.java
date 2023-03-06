@@ -18,7 +18,10 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @Table(
         name = "bookings",
-        indexes = {@Index(name = "booking_item_id_idx", columnList = "item_id")}
+        indexes = {
+                @Index(name = "booking_item_id_idx", columnList = "item_id"),
+                @Index(name = "booking_booker_id_idx", columnList = "booker_id")
+        }
 )
 public class Booking extends BaseEntity<Long> {
 

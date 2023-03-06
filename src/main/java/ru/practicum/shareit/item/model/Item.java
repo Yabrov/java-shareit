@@ -18,7 +18,10 @@ import java.util.List;
 @Setter
 @DynamicUpdate
 @NoArgsConstructor
-@Table(name = "items")
+@Table(
+        name = "items",
+        indexes = {@Index(name = "items_owner_id_idx", columnList = "owner_id")}
+)
 public class Item extends BaseEntity<Long> {
 
     @Column(name = "name", nullable = false)
