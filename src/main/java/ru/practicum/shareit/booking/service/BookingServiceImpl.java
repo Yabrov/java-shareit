@@ -14,6 +14,7 @@ import ru.practicum.shareit.booking.exceptions.BookingOverlapsException;
 import ru.practicum.shareit.booking.exceptions.BookingStateException;
 import ru.practicum.shareit.booking.exceptions.BookingUpdateException;
 import ru.practicum.shareit.booking.repository.BookingRepository;
+import ru.practicum.shareit.booking.service.provider.BookingProvider;
 import ru.practicum.shareit.item.exceptions.ItemNotFoundException;
 import ru.practicum.shareit.item.exceptions.ItemUnavailableException;
 import ru.practicum.shareit.item.model.Item;
@@ -22,7 +23,6 @@ import ru.practicum.shareit.user.User;
 import ru.practicum.shareit.user.exception.UserNotFoundException;
 import ru.practicum.shareit.user.repository.UserRepository;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -37,6 +37,7 @@ public class BookingServiceImpl implements BookingService {
     private final UserRepository userRepository;
     private final Converter<Booking, BookingResponseDto> bookingResponseMapper;
     private final Converter<BookingRequestDto, Booking> bookingRequestMapper;
+    private final BookingProvider bookingProviderSelector;
 
     @Transactional
     @Override
@@ -110,33 +111,11 @@ public class BookingServiceImpl implements BookingService {
         } catch (IllegalArgumentException e) {
             throw new BookingStateException(state);
         }
-        List<Booking> bookings = new ArrayList<>();
-        switch (bookingState) {
-            case PAST: {
-                bookings.addAll(bookingRepository.findAllPastBookingsOfUser(userId));
-                break;
-            }
-            case FUTURE: {
-                bookings.addAll(bookingRepository.findAllFutureBookingsOfUser(userId));
-                break;
-            }
-            case CURRENT: {
-                bookings.addAll(bookingRepository.findAllCurrentBookingsOfUser(userId));
-                break;
-            }
-            case WAITING: {
-                bookings.addAll(bookingRepository.findAllBookingsOfUserWithStatus(userId, BookingStatus.WAITING));
-                break;
-            }
-            case REJECTED: {
-                bookings.addAll(bookingRepository.findAllBookingsOfUserWithStatus(userId, BookingStatus.REJECTED));
-                break;
-            }
-            default: {
-                bookings.addAll(bookingRepository.findAllBookingOfUser(userId));
-            }
-        }
-        return bookings.stream().map(bookingResponseMapper::convert).collect(Collectors.toList());
+        return bookingProviderSelector
+                .getAllBookingsOfUser(userId, bookingState)
+                .stream()
+                .map(bookingResponseMapper::convert)
+                .collect(Collectors.toList());
     }
 
     @Override
@@ -159,32 +138,10 @@ public class BookingServiceImpl implements BookingService {
         } catch (IllegalArgumentException e) {
             throw new BookingStateException(state);
         }
-        List<Booking> bookings = new ArrayList<>();
-        switch (bookingState) {
-            case PAST: {
-                bookings.addAll(bookingRepository.findAllPastBookingsOfItems(itemIds));
-                break;
-            }
-            case FUTURE: {
-                bookings.addAll(bookingRepository.findAllFutureBookingsOfItems(itemIds));
-                break;
-            }
-            case CURRENT: {
-                bookings.addAll(bookingRepository.findAllCurrentBookingsOfItems(itemIds));
-                break;
-            }
-            case WAITING: {
-                bookings.addAll(bookingRepository.findAllBookingsOfItemsWithStatus(itemIds, BookingStatus.WAITING));
-                break;
-            }
-            case REJECTED: {
-                bookings.addAll(bookingRepository.findAllBookingsOfItemsWithStatus(itemIds, BookingStatus.REJECTED));
-                break;
-            }
-            default: {
-                bookings.addAll(bookingRepository.findAllBookingOfItems(itemIds));
-            }
-        }
-        return bookings.stream().map(bookingResponseMapper::convert).collect(Collectors.toList());
+        return bookingProviderSelector
+                .getAllBookingsForOwnerItems(itemIds, bookingState)
+                .stream()
+                .map(bookingResponseMapper::convert)
+                .collect(Collectors.toList());
     }
 }
