@@ -45,7 +45,6 @@ public class DatabaseItemRepositoryImpl implements ItemRepository {
         return deletedItem;
     }
 
-    @Transactional
     @Override
     public Item saveItem(Item item) {
         return itemRepository.save(item);
