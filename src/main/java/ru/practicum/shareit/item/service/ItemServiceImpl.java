@@ -69,7 +69,7 @@ public class ItemServiceImpl implements ItemService {
         item.setOwner(owner);
         Item savedItem = itemRepository.saveItem(item);
         log.info("Item with id {} saved.", savedItem.getId());
-        return addNextAndLastBooking(addComments(itemMapper.convert(savedItem)));
+        return addNextAndLastBooking(itemMapper.convert(savedItem));
     }
 
     @Transactional
