@@ -1,6 +1,6 @@
 package ru.practicum.shareit.booking.repository;
 
-import org.springframework.context.annotation.Lazy;
+import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
@@ -12,14 +12,11 @@ import java.util.Collection;
 
 @Repository
 @Transactional(readOnly = true)
+@RequiredArgsConstructor
 public class DatabaseBookingRepositoryImpl implements BookingRepository {
 
     private final JpaBookingRepository bookingRepository;
     private final Sort bookingSort = Sort.by(Sort.Direction.DESC, "start");
-
-    public DatabaseBookingRepositoryImpl(@Lazy JpaBookingRepository bookingRepository) {
-        this.bookingRepository = bookingRepository;
-    }
 
     @Override
     public Booking findBookingById(Long bookingId) {
