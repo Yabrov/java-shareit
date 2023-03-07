@@ -4,7 +4,7 @@ public class ItemNotFoundException extends RuntimeException {
 
     private static final String MES_PATTERN = "Item with id %s does not exist.";
 
-    public ItemNotFoundException(Integer id) {
+    public ItemNotFoundException(Long id) {
         super(String.format(MES_PATTERN, id));
     }
 }

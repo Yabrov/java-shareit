@@ -4,7 +4,7 @@ public class UserNotFoundException extends RuntimeException {
 
     private static final String MES_PATTERN = "User with id %s does not exist.";
 
-    public UserNotFoundException(Integer id) {
+    public UserNotFoundException(Long id) {
         super(String.format(MES_PATTERN, id));
     }
 }

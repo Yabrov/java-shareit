@@ -6,13 +6,13 @@ import java.util.Collection;
 
 public interface UserService {
 
-    UserDto findUserById(Integer userId);
+    UserDto findUserById(Long userId);
 
-    UserDto updateUser(Integer userId, UserDto userDto);
+    UserDto updateUser(Long userId, UserDto userDto);
 
     UserDto createUser(UserDto userDto);
 
-    UserDto deleteUser(Integer userId);
+    UserDto deleteUser(Long userId);
 
     Collection<UserDto> getAllUsers();
 }
