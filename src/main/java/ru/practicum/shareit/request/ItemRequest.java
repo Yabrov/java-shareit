@@ -19,7 +19,10 @@ import java.util.List;
 @Setter
 @DynamicUpdate
 @NoArgsConstructor
-@Table(name = "requests")
+@Table(
+        name = "requests",
+        indexes = {@Index(name = "requests_owner_id_idx", columnList = "requestor_id")}
+)
 public class ItemRequest extends BaseEntity<Long> {
 
     @Column(

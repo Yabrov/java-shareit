@@ -20,7 +20,10 @@ import java.util.List;
 @NoArgsConstructor
 @Table(
         name = "items",
-        indexes = {@Index(name = "items_owner_id_idx", columnList = "owner_id")}
+        indexes = {
+                @Index(name = "items_owner_id_idx", columnList = "owner_id"),
+                @Index(name = "items_request_id_idx", columnList = "request_id")
+        }
 )
 public class Item extends BaseEntity<Long> {
 
