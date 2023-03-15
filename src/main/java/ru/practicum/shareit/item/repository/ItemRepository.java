@@ -1,5 +1,7 @@
 package ru.practicum.shareit.item.repository;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import ru.practicum.shareit.booking.Booking;
 import ru.practicum.shareit.item.model.Comment;
 import ru.practicum.shareit.item.model.Item;
@@ -18,7 +20,11 @@ public interface ItemRepository {
 
     Collection<Item> findAllItems(Long userId);
 
+    Page<Item> findAllItems(Long userId, Pageable pageable);
+
     Collection<Item> searchItem(String text);
+
+    Page<Item> searchItem(String text, Pageable pageable);
 
     Booking getNextBookingByItemId(Long itemId);
 

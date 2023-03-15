@@ -15,9 +15,9 @@ public interface ItemService {
 
     ItemDto deleteItem(Long userId, Long itemId);
 
-    Collection<ItemDto> getAllItems(Long userId);
+    Collection<ItemDto> getAllItems(Long userId, Integer from, Integer size);
 
-    Collection<ItemDto> searchItem(String text);
+    Collection<ItemDto> searchItem(String text, Integer from, Integer size);
 
     CommentDto createComment(Long userId, Long itemId, CommentDto commentDto);
 }

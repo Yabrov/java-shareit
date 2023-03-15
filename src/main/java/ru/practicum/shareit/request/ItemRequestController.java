@@ -1,17 +1,13 @@
 package ru.practicum.shareit.request;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.request.dto.ItemRequestDto;
 import ru.practicum.shareit.request.service.ItemRequestService;
 
 import javax.validation.Valid;
-import javax.validation.constraints.Min;
-import javax.validation.constraints.NotNull;
 import java.util.Collection;
 
-@Validated
 @RestController
 @RequiredArgsConstructor
 @RequestMapping(path = "/requests")
@@ -20,8 +16,10 @@ public class ItemRequestController {
     private final ItemRequestService itemRequestService;
 
     @GetMapping("/{requestId}")
-    public ItemRequestDto getItemRequest(@PathVariable Long requestId) {
-        return itemRequestService.getItemRequest(requestId);
+    public ItemRequestDto getItemRequest(
+            @RequestHeader("X-Sharer-User-Id") Long userId,
+            @PathVariable Long requestId) {
+        return itemRequestService.getItemRequest(userId, requestId);
     }
 
     @PostMapping()
@@ -39,8 +37,8 @@ public class ItemRequestController {
     @GetMapping("/all")
     public Collection<ItemRequestDto> getAllItemRequests(
             @RequestHeader(value = "X-Sharer-User-Id") Long userId,
-            @RequestParam @Min(0) @NotNull Integer from,
-            @RequestParam @Min(1) @NotNull Integer size) {
+            @RequestParam(required = false) Integer from,
+            @RequestParam(required = false) Integer size) {
         return itemRequestService.getAllItemRequests(userId, from, size);
     }
 }

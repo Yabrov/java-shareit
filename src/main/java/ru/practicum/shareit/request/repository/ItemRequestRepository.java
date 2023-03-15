@@ -17,4 +17,6 @@ public interface ItemRequestRepository {
     Collection<ItemRequest> getItemRequestsByOwner(User owner, Sort sort);
 
     Page<ItemRequest> getAllItemRequests(User requestor, Pageable pageable);
+
+    Collection<ItemRequest> getAllItemRequests(User requestor);
 }

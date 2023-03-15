@@ -2,6 +2,8 @@ package ru.practicum.shareit.booking.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.convert.converter.Converter;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.booking.Booking;
@@ -15,6 +17,7 @@ import ru.practicum.shareit.booking.exceptions.BookingStateException;
 import ru.practicum.shareit.booking.exceptions.BookingUpdateException;
 import ru.practicum.shareit.booking.repository.BookingRepository;
 import ru.practicum.shareit.booking.service.provider.BookingProvider;
+import ru.practicum.shareit.config.PageBuilder;
 import ru.practicum.shareit.item.exceptions.ItemNotFoundException;
 import ru.practicum.shareit.item.exceptions.ItemUnavailableException;
 import ru.practicum.shareit.item.model.Item;
@@ -38,6 +41,7 @@ public class BookingServiceImpl implements BookingService {
     private final Converter<Booking, BookingResponseDto> bookingResponseMapper;
     private final Converter<BookingRequestDto, Booking> bookingRequestMapper;
     private final BookingProvider bookingProviderSelector;
+    private final PageBuilder pageBuilder;
 
     @Transactional
     @Override
@@ -100,7 +104,7 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
-    public Collection<BookingResponseDto> getAllBookingsOfUser(Long userId, String state) {
+    public Collection<BookingResponseDto> getAllBookingsOfUser(Long userId, String state, Integer from, Integer size) {
         User user = userRepository.findUserById(userId);
         if (user == null) {
             throw new UserNotFoundException(userId);
@@ -111,15 +115,23 @@ public class BookingServiceImpl implements BookingService {
         } catch (IllegalArgumentException e) {
             throw new BookingStateException(state);
         }
+        if (from == null || size == null) {
+            return bookingProviderSelector
+                    .getAllBookingsOfUser(userId, bookingState)
+                    .stream()
+                    .map(bookingResponseMapper::convert)
+                    .collect(Collectors.toList());
+        }
+        Pageable pageable = pageBuilder.build(from, size, Sort.by(Sort.Direction.DESC, "start"));
         return bookingProviderSelector
-                .getAllBookingsOfUser(userId, bookingState)
+                .getAllBookingsOfUser(userId, bookingState, pageable)
                 .stream()
                 .map(bookingResponseMapper::convert)
                 .collect(Collectors.toList());
     }
 
     @Override
-    public Collection<BookingResponseDto> getAllBookingsForOwnerItems(Long userId, String state) {
+    public Collection<BookingResponseDto> getAllBookingsForOwnerItems(Long userId, String state, Integer from, Integer size) {
         User user = userRepository.findUserById(userId);
         if (user == null) {
             throw new UserNotFoundException(userId);
@@ -138,8 +150,16 @@ public class BookingServiceImpl implements BookingService {
         } catch (IllegalArgumentException e) {
             throw new BookingStateException(state);
         }
+        if (from == null || size == null) {
+            return bookingProviderSelector
+                    .getAllBookingsForOwnerItems(itemIds, bookingState)
+                    .stream()
+                    .map(bookingResponseMapper::convert)
+                    .collect(Collectors.toList());
+        }
+        Pageable pageable = pageBuilder.build(from, size, Sort.by(Sort.Direction.DESC, "start"));
         return bookingProviderSelector
-                .getAllBookingsForOwnerItems(itemIds, bookingState)
+                .getAllBookingsForOwnerItems(itemIds, bookingState, pageable)
                 .stream()
                 .map(bookingResponseMapper::convert)
                 .collect(Collectors.toList());

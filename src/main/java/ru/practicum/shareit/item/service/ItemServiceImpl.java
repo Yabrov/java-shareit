@@ -3,10 +3,12 @@ package ru.practicum.shareit.item.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.convert.converter.Converter;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.booking.Booking;
 import ru.practicum.shareit.booking.dto.BookingLinkedDto;
+import ru.practicum.shareit.config.PageBuilder;
 import ru.practicum.shareit.item.dto.CommentDto;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.exceptions.CommentCreateException;
@@ -35,6 +37,7 @@ public class ItemServiceImpl implements ItemService {
     private final Converter<Booking, BookingLinkedDto> bookingMapper;
     private final Converter<Comment, CommentDto> commentMapper;
     private final Converter<CommentDto, Comment> commentDtoMapper;
+    private final PageBuilder pageBuilder;
 
     @Override
     public ItemDto getItem(Long userId, Long itemId) {
@@ -120,9 +123,20 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public Collection<ItemDto> getAllItems(Long userId) {
+    public Collection<ItemDto> getAllItems(Long userId, Integer from, Integer size) {
+        if (from == null || size == null) {
+            return itemRepository
+                    .findAllItems(userId)
+                    .stream()
+                    .filter(Item::getAvailable)
+                    .map(itemMapper::convert)
+                    .map(this::addNextAndLastBooking)
+                    .map(this::addComments)
+                    .collect(Collectors.toList());
+        }
+        Pageable pageable = pageBuilder.build(from, size, null);
         return itemRepository
-                .findAllItems(userId)
+                .findAllItems(userId, pageable)
                 .stream()
                 .filter(Item::getAvailable)
                 .map(itemMapper::convert)
@@ -132,11 +146,21 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public Collection<ItemDto> searchItem(String text) {
-        return text.isEmpty()
-                ? Collections.emptyList()
-                : itemRepository
-                .searchItem(text)
+    public Collection<ItemDto> searchItem(String text, Integer from, Integer size) {
+        if (text.isEmpty()) {
+            return Collections.emptyList();
+        }
+        if (from == null || size == null) {
+            return itemRepository
+                    .searchItem(text)
+                    .stream()
+                    .filter(Item::getAvailable)
+                    .map(itemMapper::convert)
+                    .collect(Collectors.toList());
+        }
+        Pageable pageable = pageBuilder.build(from, size, null);
+        return itemRepository
+                .searchItem(text, pageable)
                 .stream()
                 .filter(Item::getAvailable)
                 .map(itemMapper::convert)

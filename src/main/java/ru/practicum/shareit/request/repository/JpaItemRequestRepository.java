@@ -24,4 +24,7 @@ public interface JpaItemRequestRepository extends JpaRepository<ItemRequest, Lon
             countQuery = "SELECT COUNT(r) FROM ItemRequest r WHERE r.requestor <> :user"
     )
     Page<ItemRequest> findAllOthersItemRequests(User user, Pageable pageable);
+
+    @Query("SELECT r FROM ItemRequest r LEFT JOIN FETCH r.items WHERE r.requestor <> :user")
+    Collection<ItemRequest> findAllOthersItemRequests(User user);
 }

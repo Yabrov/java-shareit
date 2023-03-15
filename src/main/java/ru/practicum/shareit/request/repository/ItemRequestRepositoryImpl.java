@@ -37,4 +37,9 @@ public class ItemRequestRepositoryImpl implements ItemRequestRepository {
     public Page<ItemRequest> getAllItemRequests(User requestor, Pageable pageable) {
         return itemRequestRepository.findAllOthersItemRequests(requestor, pageable);
     }
+
+    @Override
+    public Collection<ItemRequest> getAllItemRequests(User requestor) {
+        return itemRequestRepository.findAllOthersItemRequests(requestor);
+    }
 }

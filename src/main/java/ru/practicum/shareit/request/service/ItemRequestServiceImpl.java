@@ -30,7 +30,11 @@ public class ItemRequestServiceImpl implements ItemRequestService {
     private final Sort requestsSort = Sort.by(Sort.Direction.DESC, "created");
 
     @Override
-    public ItemRequestDto getItemRequest(Long requestId) {
+    public ItemRequestDto getItemRequest(Long userId, Long requestId) {
+        User user = userRepository.findUserById(userId);
+        if (user == null) {
+            throw new UserNotFoundException(userId);
+        }
         ItemRequest itemRequest = itemRequestRepository.getItemRequest(requestId);
         if (itemRequest == null) {
             throw new ItemRequestNotFoundException(requestId);
@@ -68,6 +72,13 @@ public class ItemRequestServiceImpl implements ItemRequestService {
         User requestor = userRepository.findUserById(userId);
         if (requestor == null) {
             throw new UserNotFoundException(userId);
+        }
+        if (from == null || size == null) {
+            return itemRequestRepository
+                    .getAllItemRequests(requestor)
+                    .stream()
+                    .map(itemRequestMapper::convert)
+                    .collect(Collectors.toList());
         }
         Pageable pageable = pageBuilder.build(from, size, requestsSort);
         return itemRequestRepository
