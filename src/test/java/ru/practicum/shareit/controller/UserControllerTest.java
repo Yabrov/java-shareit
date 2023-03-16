@@ -39,20 +39,23 @@ public class UserControllerTest {
     private final UserDto userDto = new UserDto(
             null,
             "test_name",
-            "test_email@test.domain.com");
+            "test_email@test.domain.com"
+    );
+
+    private final Long expectedUserId = 1L;
 
     @Test
     @DisplayName("Create valid user test")
     void createValidUserTest() throws Exception {
         when(userService.createUser(any()))
-                .thenReturn(userDto.withId(1L));
+                .thenReturn(userDto.withId(expectedUserId));
         mvc.perform(post("/users")
                         .content(mapper.writeValueAsString(userDto))
                         .characterEncoding(StandardCharsets.UTF_8)
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id", is(1L), Long.class))
+                .andExpect(jsonPath("$.id", is(expectedUserId), Long.class))
                 .andExpect(jsonPath("$.name", is(userDto.getName())))
                 .andExpect(jsonPath("$.email", is(userDto.getEmail())));
         verify(userService, times(1)).createUser(any());
@@ -68,7 +71,7 @@ public class UserControllerTest {
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.error").exists());
-        verify(userService, times(0)).createUser(any());
+        verify(userService, never()).createUser(any());
     }
 
     @Test
@@ -81,7 +84,7 @@ public class UserControllerTest {
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.error").exists());
-        verify(userService, times(0)).createUser(any());
+        verify(userService, never()).createUser(any());
     }
 
     @Test
@@ -103,15 +106,14 @@ public class UserControllerTest {
     @Test
     @DisplayName("Get existing user test")
     void getExistingUserTest() throws Exception {
-        long desiredId = 1L;
         when(userService.findUserById(anyLong()))
-                .thenReturn(userDto.withId(desiredId));
-        mvc.perform(get("/users/" + desiredId)
+                .thenReturn(userDto.withId(expectedUserId));
+        mvc.perform(get("/users/" + expectedUserId)
                         .characterEncoding(StandardCharsets.UTF_8)
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id", is(desiredId), Long.class))
+                .andExpect(jsonPath("$.id", is(expectedUserId), Long.class))
                 .andExpect(jsonPath("$.name", is(userDto.getName())))
                 .andExpect(jsonPath("$.email", is(userDto.getEmail())));
         verify(userService, times(1)).findUserById(anyLong());
@@ -120,10 +122,9 @@ public class UserControllerTest {
     @Test
     @DisplayName("Get not existing user test")
     void getNotExistingUserTest() throws Exception {
-        long desiredId = 1L;
         when(userService.findUserById(anyLong()))
-                .thenThrow(new UserNotFoundException(desiredId));
-        mvc.perform(get("/users/" + desiredId)
+                .thenThrow(new UserNotFoundException(expectedUserId));
+        mvc.perform(get("/users/" + expectedUserId)
                         .characterEncoding(StandardCharsets.UTF_8)
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isNotFound())
@@ -139,22 +140,21 @@ public class UserControllerTest {
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isInternalServerError())
                 .andExpect(jsonPath("$.error").exists());
-        verify(userService, times(0)).findUserById(anyLong());
+        verify(userService, never()).findUserById(anyLong());
     }
 
     @Test
     @DisplayName("Update existing user test")
     void updateExistingUserTest() throws Exception {
-        long desiredId = 1L;
         when(userService.updateUser(anyLong(), any()))
-                .thenReturn(userDto.withId(desiredId).withName("Updated name"));
-        mvc.perform(patch("/users/" + desiredId)
+                .thenReturn(userDto.withId(expectedUserId).withName("Updated name"));
+        mvc.perform(patch("/users/" + expectedUserId)
                         .content(mapper.writeValueAsString(userDto))
                         .characterEncoding(StandardCharsets.UTF_8)
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id", is(desiredId), Long.class))
+                .andExpect(jsonPath("$.id", is(expectedUserId), Long.class))
                 .andExpect(jsonPath("$.name", is("Updated name")))
                 .andExpect(jsonPath("$.email", is(userDto.getEmail())));
         verify(userService, times(1)).updateUser(anyLong(), any());
@@ -163,10 +163,9 @@ public class UserControllerTest {
     @Test
     @DisplayName("Update not existing user test")
     void updateNotExistingUserTest() throws Exception {
-        long desiredId = 99L;
         when(userService.updateUser(anyLong(), any()))
-                .thenThrow(new UserNotFoundException(desiredId));
-        mvc.perform(patch("/users/" + desiredId)
+                .thenThrow(new UserNotFoundException(expectedUserId));
+        mvc.perform(patch("/users/" + expectedUserId)
                         .content(mapper.writeValueAsString(userDto))
                         .characterEncoding(StandardCharsets.UTF_8)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -179,14 +178,13 @@ public class UserControllerTest {
     @Test
     @DisplayName("Delete existing user test")
     void deleteExistingUserTest() throws Exception {
-        long desiredId = 1L;
         when(userService.deleteUser(anyLong()))
-                .thenReturn(userDto.withId(desiredId));
-        mvc.perform(delete("/users/" + desiredId)
+                .thenReturn(userDto.withId(expectedUserId));
+        mvc.perform(delete("/users/" + expectedUserId)
                         .characterEncoding(StandardCharsets.UTF_8)
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id", is(desiredId), Long.class))
+                .andExpect(jsonPath("$.id", is(expectedUserId), Long.class))
                 .andExpect(jsonPath("$.name", is(userDto.getName())))
                 .andExpect(jsonPath("$.email", is(userDto.getEmail())));
         verify(userService, times(1)).deleteUser(anyLong());
@@ -195,10 +193,9 @@ public class UserControllerTest {
     @Test
     @DisplayName("Delete not existing user test")
     void deleteNotExistingUserTest() throws Exception {
-        long desiredId = 99L;
         when(userService.deleteUser(anyLong()))
-                .thenThrow(new UserNotFoundException(desiredId));
-        mvc.perform(delete("/users/" + desiredId)
+                .thenThrow(new UserNotFoundException(expectedUserId));
+        mvc.perform(delete("/users/" + expectedUserId)
                         .characterEncoding(StandardCharsets.UTF_8)
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isNotFound())

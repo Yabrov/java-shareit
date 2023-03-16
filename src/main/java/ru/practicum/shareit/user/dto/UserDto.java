@@ -8,20 +8,18 @@ import lombok.With;
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotNull;
 
+@With
 @Getter
 @NotNull
 @AllArgsConstructor
 public class UserDto {
 
-    @With
     @JsonProperty("id")
     private Long id;
 
-    @With
     @JsonProperty("name")
     private String name;
 
-    @With
     @Email
     @NotNull
     @JsonProperty("email")
