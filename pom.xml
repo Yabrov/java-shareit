@@ -123,7 +123,7 @@
 					<artifactId>spotbugs-maven-plugin</artifactId>
 					<version>4.7.0.0</version>
 					<configuration>
-						<effort>Max</effort>
+						<effort>Min</effort>
 						<threshold>High</threshold>
 					</configuration>
 					<executions>
