@@ -98,7 +98,7 @@
 					<version>3.1.2</version>
 					<configuration>
 						<configLocation>checkstyle.xml</configLocation>
-						<failOnViolation>false</failOnViolation>
+						<failOnViolation>true</failOnViolation>
 						<logViolationsToConsole>true</logViolationsToConsole>
 						<includeTestSourceDirectory>true</includeTestSourceDirectory>
 					</configuration>
@@ -125,6 +125,7 @@
 					<configuration>
 						<effort>Max</effort>
 						<threshold>High</threshold>
+						<failThreshold>false</failThreshold>
 					</configuration>
 					<executions>
 						<execution>
