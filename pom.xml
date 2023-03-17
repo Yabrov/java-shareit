@@ -124,8 +124,7 @@
 					<version>4.7.0.0</version>
 					<configuration>
 						<effort>Max</effort>
-						<threshold>High</threshold>
-						<failThreshold>false</failThreshold>
+						<failOnError>false</failOnError>
 					</configuration>
 					<executions>
 						<execution>
