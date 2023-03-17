@@ -12,6 +12,7 @@ import javax.validation.constraints.NotNull;
 @Getter
 @NotNull
 @AllArgsConstructor
+@SuppressWarnings(value = {"RC_REF_COMPARISON", "ES_COMPARING_PARAMETER_STRING_WITH_EQ"})
 public class UserDto {
 
     @JsonProperty("id")
