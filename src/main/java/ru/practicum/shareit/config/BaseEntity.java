@@ -1,7 +1,9 @@
 package ru.practicum.shareit.config;
 
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.experimental.SuperBuilder;
 
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -11,8 +13,10 @@ import java.io.Serializable;
 
 @Getter
 @Setter
+@SuperBuilder
+@NoArgsConstructor
 @MappedSuperclass
-public abstract class BaseEntity<T extends Serializable> implements Serializable {
+public class BaseEntity<T extends Serializable> implements Serializable {
 
     private static final Long serialVersionUID = 1L;
 
@@ -40,9 +44,7 @@ public abstract class BaseEntity<T extends Serializable> implements Serializable
         if (!entity.getClass().equals(this.getClass())) {
             return false;
         }
-        if (id == null || !id.equals(entity.id)) return false;
-
-        return true;
+        return id != null && id.equals(entity.id);
     }
 
     @Override

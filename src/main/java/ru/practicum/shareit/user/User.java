@@ -1,8 +1,7 @@
 package ru.practicum.shareit.user;
 
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
+import lombok.experimental.SuperBuilder;
 import org.hibernate.annotations.DynamicUpdate;
 import ru.practicum.shareit.booking.Booking;
 import ru.practicum.shareit.config.BaseEntity;
@@ -14,11 +13,14 @@ import javax.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
 
+@With
 @Entity
 @Getter
 @Setter
+@SuperBuilder
 @DynamicUpdate
 @NoArgsConstructor
+@AllArgsConstructor
 @Table(name = "users")
 public class User extends BaseEntity<Long> {
 
