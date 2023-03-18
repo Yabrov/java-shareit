@@ -1,6 +1,7 @@
 package ru.practicum.shareit.service;
 
 import lombok.RequiredArgsConstructor;
+import org.assertj.core.util.Lists;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,6 +16,9 @@ import ru.practicum.shareit.user.repository.DatabaseUserRepositoryImpl;
 import ru.practicum.shareit.user.repository.UserRepository;
 import ru.practicum.shareit.user.service.UserService;
 import ru.practicum.shareit.user.service.UserServiceImpl;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatExceptionOfType;
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
@@ -83,7 +87,7 @@ public class UserServiceTest {
     }
 
     @Test
-    @DisplayName("Get existing user test")
+    @DisplayName("Update existing user test")
     void updateExistingUserTest() throws Exception {
         String updatedName = "updated_test_name";
         when(userRepository.findUserById(anyLong()))
@@ -96,5 +100,39 @@ public class UserServiceTest {
         assertThat(result.getEmail()).isEqualTo(userDto.getEmail());
         verify(userRepository, times(1)).findUserById(anyLong());
         verify(userRepository, times(1)).updateUser(any());
+    }
+
+    @Test
+    @DisplayName("Update not existing user test")
+    void updateNotExistingUserTest() throws Exception {
+        when(userRepository.findUserById(anyLong())).thenReturn(null);
+        assertThatExceptionOfType(UserNotFoundException.class)
+                .isThrownBy(() -> userService.updateUser(expectedUserId, userDto));
+        verify(userRepository, times(1)).findUserById(anyLong());
+    }
+
+    @Test
+    @DisplayName("Delete user test")
+    void deleteUserTest() throws Exception {
+        when(userRepository.deleteUser(any()))
+                .thenReturn(user.withId(expectedUserId));
+        UserDto result = userService.deleteUser(expectedUserId);
+        assertThat(result.getId()).isEqualTo(expectedUserId);
+        assertThat(result.getName()).isEqualTo(userDto.getName());
+        assertThat(result.getEmail()).isEqualTo(userDto.getEmail());
+        verify(userRepository, times(1)).deleteUser(any());
+    }
+
+    @Test
+    @DisplayName("Get all users test")
+    void getAllUsersTest() throws Exception {
+        when(userRepository.findAllUsers())
+                .thenReturn(Lists.list(user.withId(expectedUserId)));
+        List<UserDto> result = new ArrayList<>(userService.getAllUsers());
+        assertThat(result).hasSize(1);
+        assertThat(result.get(0).getId()).isEqualTo(expectedUserId);
+        assertThat(result.get(0).getName()).isEqualTo(userDto.getName());
+        assertThat(result.get(0).getEmail()).isEqualTo(userDto.getEmail());
+        verify(userRepository, times(1)).findAllUsers();
     }
 }

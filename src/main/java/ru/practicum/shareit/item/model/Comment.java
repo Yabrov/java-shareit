@@ -74,6 +74,12 @@ public class Comment extends BaseEntity<Long> {
         return comment;
     }
 
+    public Comment withItem(Item item) {
+        Comment comment = (Comment) SerializationUtils.clone(this);
+        comment.setItem(item);
+        return comment;
+    }
+
     public Comment withCreated(LocalDateTime created) {
         Comment comment = (Comment) SerializationUtils.clone(this);
         comment.setCreated(created);

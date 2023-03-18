@@ -51,12 +51,12 @@ public class ItemServiceImpl implements ItemService {
             if (user == null) {
                 throw new UserNotFoundException(userId);
             }
-            if (item.getOwner().equals(user)) {
+            if (item.getOwner() != null && item.getOwner().equals(user)) {
                 itemDto = addNextAndLastBooking(addComments(itemDto));
             }
-        }
-        if (Boolean.TRUE.equals(itemRepository.isUserCommentatorOfItem(itemId, userId))) {
-            itemDto = addComments(itemDto);
+            if (Boolean.TRUE.equals(itemRepository.isUserCommentatorOfItem(itemId, userId))) {
+                itemDto = addComments(itemDto);
+            }
         }
         return itemDto;
     }
@@ -179,9 +179,7 @@ public class ItemServiceImpl implements ItemService {
         if (Boolean.FALSE.equals(itemRepository.isUserRealBookerOfItem(itemId, userId))) {
             throw new CommentCreateException("You are not allowed to comment item id " + itemId);
         }
-        Comment comment = commentDtoMapper.convert(commentDto);
-        comment.setItem(item);
-        comment.setAuthor(author);
+        Comment comment = commentDtoMapper.convert(commentDto).withItem(item).withAuthor(author);
         return commentMapper.convert(itemRepository.createComment(comment));
     }
 

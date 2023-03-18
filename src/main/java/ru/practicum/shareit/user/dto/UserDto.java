@@ -2,6 +2,7 @@ package ru.practicum.shareit.user.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 import org.apache.commons.lang.SerializationUtils;
@@ -14,6 +15,7 @@ import java.io.Serializable;
 @Setter
 @NotNull
 @AllArgsConstructor
+@EqualsAndHashCode
 public class UserDto implements Serializable {
 
     private static final Long serialVersionUID = 2L;
