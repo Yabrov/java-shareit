@@ -60,9 +60,7 @@ public class BookingServiceImpl implements BookingService {
         if (user.equals(item.getOwner())) {
             throw new ItemNotFoundException(item.getId());
         }
-        Booking booking = bookingRequestMapper.convert(bookingRequestDto);
-        booking.setBooker(user);
-        booking.setItem(item);
+        Booking booking = bookingRequestMapper.convert(bookingRequestDto).withBooker(user).withItem(item);
         if (bookingRepository.isBookingOverlapsOthers(booking)) {
             throw new BookingOverlapsException();
         }

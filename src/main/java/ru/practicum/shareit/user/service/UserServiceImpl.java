@@ -39,8 +39,7 @@ public class UserServiceImpl implements UserService {
         if (user == null) {
             throw new UserNotFoundException(userId);
         }
-        User newUser = userDtoMapper.convert(userDto);
-        newUser.setId(userId);
+        User newUser = userDtoMapper.convert(userDto).withId(userId);
         newUser.setName(userDto.getName() == null ? user.getName() : userDto.getName());
         newUser.setEmail(userDto.getEmail() == null ? user.getEmail() : userDto.getEmail());
         User updatedUser = userRepository.updateUser(newUser);

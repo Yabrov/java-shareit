@@ -68,8 +68,7 @@ public class ItemServiceImpl implements ItemService {
         if (owner == null) {
             throw new UserNotFoundException(userId);
         }
-        Item item = itemDtoMapper.convert(itemDto);
-        item.setOwner(owner);
+        Item item = itemDtoMapper.convert(itemDto).withOwner(owner);
         Item savedItem = itemRepository.saveItem(item);
         log.info("Item with id {} saved.", savedItem.getId());
         return addNextAndLastBooking(itemMapper.convert(savedItem));

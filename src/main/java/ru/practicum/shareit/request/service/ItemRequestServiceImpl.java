@@ -49,8 +49,7 @@ public class ItemRequestServiceImpl implements ItemRequestService {
         if (user == null) {
             throw new UserNotFoundException(userId);
         }
-        ItemRequest itemRequest = itemRequestDtoMapper.convert(itemRequestDto);
-        itemRequest.setRequestor(user);
+        ItemRequest itemRequest = itemRequestDtoMapper.convert(itemRequestDto).withRequestor(user);
         return itemRequestMapper.convert(itemRequestRepository.createItemRequest(itemRequest));
     }
 

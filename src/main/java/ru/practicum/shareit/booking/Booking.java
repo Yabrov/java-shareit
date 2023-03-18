@@ -3,6 +3,7 @@ package ru.practicum.shareit.booking;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.apache.commons.lang.SerializationUtils;
 import org.hibernate.annotations.DynamicUpdate;
 import ru.practicum.shareit.config.BaseEntity;
 import ru.practicum.shareit.item.model.Item;
@@ -24,6 +25,18 @@ import java.time.LocalDateTime;
         }
 )
 public class Booking extends BaseEntity<Long> {
+
+    public Booking(LocalDateTime start,
+                   LocalDateTime end,
+                   Item item,
+                   User booker,
+                   BookingStatus status) {
+        this.start = start;
+        this.end = end;
+        this.item = item;
+        this.booker = booker;
+        this.status = status;
+    }
 
     @Column(
             name = "start_date",
@@ -54,4 +67,40 @@ public class Booking extends BaseEntity<Long> {
     )
     @Enumerated(value = EnumType.STRING)
     private BookingStatus status = BookingStatus.WAITING;
+
+    public Booking withId(Long id) {
+        Booking booking = (Booking) SerializationUtils.clone(this);
+        booking.setId(id);
+        return booking;
+    }
+
+    public Booking withStart(LocalDateTime start) {
+        Booking booking = (Booking) SerializationUtils.clone(this);
+        booking.setStart(start);
+        return booking;
+    }
+
+    public Booking withEnd(LocalDateTime end) {
+        Booking booking = (Booking) SerializationUtils.clone(this);
+        booking.setStart(end);
+        return booking;
+    }
+
+    public Booking withItem(Item item) {
+        Booking booking = (Booking) SerializationUtils.clone(this);
+        booking.setItem(item);
+        return booking;
+    }
+
+    public Booking withBooker(User booker) {
+        Booking booking = (Booking) SerializationUtils.clone(this);
+        booking.setBooker(booker);
+        return booking;
+    }
+
+    public Booking withStatus(BookingStatus status) {
+        Booking booking = (Booking) SerializationUtils.clone(this);
+        booking.setStatus(status);
+        return booking;
+    }
 }

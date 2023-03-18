@@ -3,7 +3,6 @@ package ru.practicum.shareit.service;
 import lombok.RequiredArgsConstructor;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.mockito.stubbing.Answer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -37,25 +36,24 @@ public class UserServiceTest {
 
     private final UserService userService;
 
+    private final Long expectedUserId = 1L;
+
     private final UserDto userDto = new UserDto(
             null,
             "test_name",
             "test_email@test.domain.com"
     );
 
-    private final Long expectedUserId = 1L;
-
-    private final User user = User
-            .builder()
-            .id(expectedUserId)
-            .name(userDto.getName())
-            .email(userDto.getEmail())
-            .build();
+    private final User user = new User(
+            userDto.getName(),
+            userDto.getEmail()
+    );
 
     @Test
     @DisplayName("Create valid user test")
     void createValidUserTest() throws Exception {
-        when(userRepository.saveUser(any())).thenReturn(user);
+        when(userRepository.saveUser(any()))
+                .thenReturn(user.withId(expectedUserId));
         UserDto result = userService.createUser(userDto);
         assertThat(result.getId()).isEqualTo(expectedUserId);
         assertThat(result.getName()).isEqualTo(userDto.getName());
@@ -66,7 +64,8 @@ public class UserServiceTest {
     @Test
     @DisplayName("Get existing user test")
     void getExistingUserTest() throws Exception {
-        when(userRepository.findUserById(anyLong())).thenReturn(user);
+        when(userRepository.findUserById(anyLong()))
+                .thenReturn(user.withId(expectedUserId));
         UserDto result = userService.findUserById(expectedUserId);
         assertThat(result.getId()).isEqualTo(expectedUserId);
         assertThat(result.getName()).isEqualTo(userDto.getName());
@@ -87,13 +86,10 @@ public class UserServiceTest {
     @DisplayName("Get existing user test")
     void updateExistingUserTest() throws Exception {
         String updatedName = "updated_test_name";
-        when(userRepository.findUserById(anyLong())).thenReturn(user);
-        when(userRepository.updateUser(any())).thenAnswer(
-                (Answer<User>) invocationOnMock -> {
-                    User updatedUser = user.withName(updatedName);
-                    updatedUser.setId(expectedUserId);
-                    return updatedUser;
-                });
+        when(userRepository.findUserById(anyLong()))
+                .thenReturn(user.withId(expectedUserId));
+        when(userRepository.updateUser(any()))
+                .thenReturn(user.withName(updatedName).withId(expectedUserId));
         UserDto result = userService.updateUser(expectedUserId, userDto);
         assertThat(result.getId()).isEqualTo(expectedUserId);
         assertThat(result.getName()).isEqualTo(updatedName);

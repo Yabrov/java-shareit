@@ -1,7 +1,10 @@
 package ru.practicum.shareit.user;
 
-import lombok.*;
-import lombok.experimental.SuperBuilder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.RequiredArgsConstructor;
+import lombok.Setter;
+import org.apache.commons.lang.SerializationUtils;
 import org.hibernate.annotations.DynamicUpdate;
 import ru.practicum.shareit.booking.Booking;
 import ru.practicum.shareit.config.BaseEntity;
@@ -13,16 +16,18 @@ import javax.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
 
-@With
 @Entity
 @Getter
 @Setter
-@SuperBuilder
 @DynamicUpdate
 @NoArgsConstructor
-@AllArgsConstructor
 @Table(name = "users")
 public class User extends BaseEntity<Long> {
+
+    public User(String name, String email) {
+        this.name = name;
+        this.email = email;
+    }
 
     @Column(name = "name", nullable = false)
     private String name;
@@ -46,4 +51,22 @@ public class User extends BaseEntity<Long> {
 
     @OneToMany(mappedBy = "author", fetch = FetchType.LAZY, cascade = CascadeType.REMOVE)
     private List<Comment> comments = new ArrayList<>();
+
+    public User withId(Long id) {
+        User user = (User) SerializationUtils.clone(this);
+        user.setId(id);
+        return user;
+    }
+
+    public User withName(String name) {
+        User user = (User) SerializationUtils.clone(this);
+        user.setName(name);
+        return user;
+    }
+
+    public User withEmail(String email) {
+        User user = (User) SerializationUtils.clone(this);
+        user.setEmail(email);
+        return user;
+    }
 }
