@@ -2,7 +2,6 @@ package ru.practicum.shareit.user;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import org.apache.commons.lang.SerializationUtils;
 import org.hibernate.annotations.DynamicUpdate;
