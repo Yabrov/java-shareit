@@ -19,13 +19,14 @@ public class BookingMapper implements Converter<Booking, BookingResponseDto> {
 
     @Override
     public BookingResponseDto convert(Booking source) {
-        return new BookingResponseDto(
+        return source != null
+                ? new BookingResponseDto(
                 source.getId(),
                 source.getStart(),
                 source.getEnd(),
                 source.getStatus(),
-                itemMapper.convert(source.getItem()),
-                userMapper.convert(source.getBooker())
-        );
+                itemMapper.convert(source.getItem() != null ? source.getItem() : null),
+                userMapper.convert(source.getBooker() != null ? source.getBooker() : null))
+                : null;
     }
 }

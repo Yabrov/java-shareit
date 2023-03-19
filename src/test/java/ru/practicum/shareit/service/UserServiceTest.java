@@ -43,7 +43,7 @@ public class UserServiceTest {
     private final Long expectedUserId = 1L;
 
     private final UserDto userDto = new UserDto(
-            null,
+            expectedUserId,
             "test_name",
             "test_email@test.domain.com"
     );
@@ -51,13 +51,12 @@ public class UserServiceTest {
     private final User user = new User(
             userDto.getName(),
             userDto.getEmail()
-    );
+    ).withId(expectedUserId);
 
     @Test
     @DisplayName("Create valid user test")
     void createValidUserTest() throws Exception {
-        when(userRepository.saveUser(any()))
-                .thenReturn(user.withId(expectedUserId));
+        when(userRepository.saveUser(any())).thenReturn(user);
         UserDto result = userService.createUser(userDto);
         assertThat(result.getId()).isEqualTo(expectedUserId);
         assertThat(result.getName()).isEqualTo(userDto.getName());
@@ -68,8 +67,7 @@ public class UserServiceTest {
     @Test
     @DisplayName("Get existing user test")
     void getExistingUserTest() throws Exception {
-        when(userRepository.findUserById(anyLong()))
-                .thenReturn(user.withId(expectedUserId));
+        when(userRepository.findUserById(anyLong())).thenReturn(user);
         UserDto result = userService.findUserById(expectedUserId);
         assertThat(result.getId()).isEqualTo(expectedUserId);
         assertThat(result.getName()).isEqualTo(userDto.getName());
@@ -90,10 +88,8 @@ public class UserServiceTest {
     @DisplayName("Update existing user test")
     void updateExistingUserTest() throws Exception {
         String updatedName = "updated_test_name";
-        when(userRepository.findUserById(anyLong()))
-                .thenReturn(user.withId(expectedUserId));
-        when(userRepository.updateUser(any()))
-                .thenReturn(user.withName(updatedName).withId(expectedUserId));
+        when(userRepository.findUserById(anyLong())).thenReturn(user);
+        when(userRepository.updateUser(any())).thenReturn(user.withName(updatedName));
         UserDto result = userService.updateUser(expectedUserId, userDto);
         assertThat(result.getId()).isEqualTo(expectedUserId);
         assertThat(result.getName()).isEqualTo(updatedName);
@@ -114,8 +110,7 @@ public class UserServiceTest {
     @Test
     @DisplayName("Delete user test")
     void deleteUserTest() throws Exception {
-        when(userRepository.deleteUser(any()))
-                .thenReturn(user.withId(expectedUserId));
+        when(userRepository.deleteUser(any())).thenReturn(user);
         UserDto result = userService.deleteUser(expectedUserId);
         assertThat(result.getId()).isEqualTo(expectedUserId);
         assertThat(result.getName()).isEqualTo(userDto.getName());
@@ -126,8 +121,7 @@ public class UserServiceTest {
     @Test
     @DisplayName("Get all users test")
     void getAllUsersTest() throws Exception {
-        when(userRepository.findAllUsers())
-                .thenReturn(Lists.list(user.withId(expectedUserId)));
+        when(userRepository.findAllUsers()).thenReturn(Lists.list(user));
         List<UserDto> result = new ArrayList<>(userService.getAllUsers());
         assertThat(result).hasSize(1);
         assertThat(result.get(0).getId()).isEqualTo(expectedUserId);

@@ -69,20 +69,16 @@ public class ItemServiceTest {
 
     private final Converter<Booking, BookingLinkedDto> bookingLinkedMapper;
 
-    private final Converter<Comment, CommentDto> commentDtoMapper;
-
-    private final PageBuilder pageBuilder;
+    private final Converter<Comment, CommentDto> commentMapper;
 
     private final Long expectedItemId = 1L;
 
     private final Long expectedUserId = 2L;
 
-    private final Long expectedRequestId = 3L;
-
-    private final Long expectedCommentId = 4L;
+    private final Long expectedCommentId = 3L;
 
     private final ItemDto itemDto = new ItemDto(
-            null,
+            expectedItemId,
             "test_item_name",
             "test_description",
             Boolean.FALSE,
@@ -95,7 +91,7 @@ public class ItemServiceTest {
     private final User user = new User(
             "test_user_name",
             "test_email@test.domain.com"
-    );
+    ).withId(expectedUserId);
 
     private final Item item = new Item(
             "test_item_name",
@@ -103,7 +99,7 @@ public class ItemServiceTest {
             false,
             null,
             null
-    );
+    ).withId(expectedItemId);
 
     private final Booking booking = new Booking(
             LocalDateTime.of(2043, 1, 1, 10, 0, 0),
@@ -118,15 +114,13 @@ public class ItemServiceTest {
             user.withId(expectedUserId),
             item.withId(expectedItemId),
             LocalDateTime.now()
-    );
+    ).withId(expectedCommentId);
 
     @Test
     @DisplayName("Create valid item test")
     void createValidItemTest() throws Exception {
-        when(userRepository.findUserById(anyLong()))
-                .thenReturn(user.withId(expectedUserId));
-        when(itemRepository.saveItem(any()))
-                .thenReturn(item.withId(expectedItemId));
+        when(userRepository.findUserById(anyLong())).thenReturn(user);
+        when(itemRepository.saveItem(any())).thenReturn(item);
         ItemDto result = itemService.createItem(expectedUserId, itemDto);
         assertThat(result.getId()).isEqualTo(expectedItemId);
         assertThat(result.getName()).isEqualTo(itemDto.getName());
@@ -143,19 +137,17 @@ public class ItemServiceTest {
     @Test
     @DisplayName("Create item by not existing user test")
     void createItemByNotExistingUserTest() throws Exception {
-        when(userRepository.findUserById(anyLong()))
-                .thenThrow(new UserNotFoundException(expectedUserId));
+        when(userRepository.findUserById(anyLong())).thenReturn(null);
         assertThatExceptionOfType(UserNotFoundException.class)
                 .isThrownBy(() -> itemService.createItem(expectedUserId, itemDto));
         verify(userRepository, times(1)).findUserById(anyLong());
-        verify(itemRepository, times(0)).saveItem(any());
+        verify(itemRepository, never()).saveItem(any());
     }
 
     @Test
     @DisplayName("Get existing item by not registered user test")
     void getExistingItemByNotRegisteredUserTest() throws Exception {
-        when(itemRepository.findItemById(anyLong()))
-                .thenReturn(item.withId(expectedItemId));
+        when(itemRepository.findItemById(anyLong())).thenReturn(item);
         ItemDto result = itemService.getItem(null, expectedItemId);
         assertThat(result.getId()).isEqualTo(expectedItemId);
         assertThat(result.getName()).isEqualTo(itemDto.getName());
@@ -175,8 +167,7 @@ public class ItemServiceTest {
     @Test
     @DisplayName("Get not existing item by not registered user test")
     void getNotExistingItemByNotRegisteredUserTest() throws Exception {
-        when(itemRepository.findItemById(anyLong()))
-                .thenThrow(new ItemNotFoundException(expectedItemId));
+        when(itemRepository.findItemById(anyLong())).thenReturn(null);
         assertThatExceptionOfType(ItemNotFoundException.class)
                 .isThrownBy(() -> itemService.getItem(null, expectedItemId));
         verify(itemRepository, times(1)).findItemById(anyLong());
@@ -189,10 +180,8 @@ public class ItemServiceTest {
     @Test
     @DisplayName("Get existing item by wrong user test")
     void getExistingItemByWrongUserTest() throws Exception {
-        when(userRepository.findUserById(anyLong()))
-                .thenThrow(new UserNotFoundException(expectedUserId));
-        when(itemRepository.findItemById(anyLong()))
-                .thenReturn(item.withId(expectedItemId));
+        when(userRepository.findUserById(anyLong())).thenReturn(null);
+        when(itemRepository.findItemById(anyLong())).thenReturn(item);
         assertThatExceptionOfType(UserNotFoundException.class)
                 .isThrownBy(() -> itemService.getItem(expectedUserId, expectedItemId));
         verify(itemRepository, times(1)).findItemById(anyLong());
@@ -211,18 +200,12 @@ public class ItemServiceTest {
         Booking nextBooking = booking
                 .withStart(LocalDateTime.of(2043, 1, 1, 2, 0, 0))
                 .withEnd(LocalDateTime.of(2043, 1, 1, 3, 0, 0));
-        when(itemRepository.findItemById(anyLong()))
-                .thenReturn(item.withId(expectedItemId).withOwner(user.withId(expectedUserId)));
-        when(userRepository.findUserById(anyLong()))
-                .thenReturn(user.withId(expectedUserId));
-        when(itemRepository.getLastBookingByItemId(anyLong()))
-                .thenReturn(lastBooking);
-        when(itemRepository.getNextBookingByItemId(anyLong()))
-                .thenReturn(nextBooking);
-        when(itemRepository.findAllItemComments(anyLong()))
-                .thenReturn(Collections.emptyList());
-        when(itemRepository.isUserCommentatorOfItem(anyLong(), anyLong()))
-                .thenReturn(Boolean.FALSE);
+        when(itemRepository.findItemById(anyLong())).thenReturn(item.withOwner(user));
+        when(userRepository.findUserById(anyLong())).thenReturn(user);
+        when(itemRepository.getLastBookingByItemId(anyLong())).thenReturn(lastBooking);
+        when(itemRepository.getNextBookingByItemId(anyLong())).thenReturn(nextBooking);
+        when(itemRepository.findAllItemComments(anyLong())).thenReturn(Collections.emptyList());
+        when(itemRepository.isUserCommentatorOfItem(anyLong(), anyLong())).thenReturn(Boolean.FALSE);
         ItemDto result = itemService.getItem(expectedUserId, expectedItemId);
         assertThat(result.getId()).isEqualTo(expectedItemId);
         assertThat(result.getName()).isEqualTo(itemDto.getName());
@@ -242,14 +225,10 @@ public class ItemServiceTest {
     @Test
     @DisplayName("Get existing item by commentator test")
     void getExistingItemByCommentatorTest() throws Exception {
-        when(itemRepository.findItemById(anyLong()))
-                .thenReturn(item.withId(expectedItemId));
-        when(userRepository.findUserById(anyLong()))
-                .thenReturn(user.withId(expectedUserId));
-        when(itemRepository.findAllItemComments(anyLong()))
-                .thenReturn(Lists.list(comment.withId(expectedCommentId)));
-        when(itemRepository.isUserCommentatorOfItem(anyLong(), anyLong()))
-                .thenReturn(Boolean.TRUE);
+        when(itemRepository.findItemById(anyLong())).thenReturn(item);
+        when(userRepository.findUserById(anyLong())).thenReturn(user);
+        when(itemRepository.findAllItemComments(anyLong())).thenReturn(Lists.list(comment));
+        when(itemRepository.isUserCommentatorOfItem(anyLong(), anyLong())).thenReturn(Boolean.TRUE);
         ItemDto result = itemService.getItem(expectedUserId, expectedItemId);
         assertThat(result.getId()).isEqualTo(expectedItemId);
         assertThat(result.getName()).isEqualTo(itemDto.getName());
@@ -259,7 +238,7 @@ public class ItemServiceTest {
         assertThat(result.getLastBooking()).isEqualTo(itemDto.getLastBooking());
         assertThat(result.getNextBooking()).isEqualTo(itemDto.getNextBooking());
         assertThat(result.getComments()).asList().isNotEmpty()
-                .contains(commentDtoMapper.convert(comment.withId(expectedCommentId)));
+                .contains(commentMapper.convert(comment));
         verify(itemRepository, times(1)).findItemById(anyLong());
         verify(userRepository, times(1)).findUserById(anyLong());
         verify(itemRepository, times(1)).findAllItemComments(anyLong());
@@ -280,24 +259,18 @@ public class ItemServiceTest {
                 .withStart(LocalDateTime.of(2043, 1, 1, 2, 0, 0))
                 .withEnd(LocalDateTime.of(2043, 1, 1, 3, 0, 0));
         when(itemRepository.findItemById(anyLong()))
-                .thenReturn(item.withId(expectedItemId).withOwner(user.withId(expectedUserId)));
+                .thenReturn(item.withId(expectedItemId).withOwner(user));
         when(itemRepository.updateItem(any()))
                 .thenReturn(item
-                        .withId(expectedItemId)
-                        .withOwner(user.withId(expectedUserId))
+                        .withOwner(user)
                         .withDescription(updatedDescription)
                         .withName(updatedName)
                         .withAvailable(updatedStatus));
-        when(userRepository.findUserById(anyLong()))
-                .thenReturn(user.withId(expectedUserId));
-        when(itemRepository.getLastBookingByItemId(anyLong()))
-                .thenReturn(lastBooking);
-        when(itemRepository.getNextBookingByItemId(anyLong()))
-                .thenReturn(nextBooking);
-        when(itemRepository.findAllItemComments(anyLong()))
-                .thenReturn(Lists.list(comment.withId(expectedCommentId)));
-        when(itemRepository.isUserCommentatorOfItem(anyLong(), anyLong()))
-                .thenReturn(Boolean.FALSE);
+        when(userRepository.findUserById(anyLong())).thenReturn(user);
+        when(itemRepository.getLastBookingByItemId(anyLong())).thenReturn(lastBooking);
+        when(itemRepository.getNextBookingByItemId(anyLong())).thenReturn(nextBooking);
+        when(itemRepository.findAllItemComments(anyLong())).thenReturn(Lists.list(comment));
+        when(itemRepository.isUserCommentatorOfItem(anyLong(), anyLong())).thenReturn(Boolean.FALSE);
         ItemDto result = itemService.updateItem(expectedUserId, expectedItemId,
                 itemDto.withDescription(updatedDescription).withName(updatedName).withAvailable(updatedStatus));
         assertThat(result.getId()).isEqualTo(expectedItemId);
@@ -307,8 +280,7 @@ public class ItemServiceTest {
         assertThat(result.getRequestId()).isEqualTo(itemDto.getRequestId());
         assertThat(result.getLastBooking()).isEqualTo(bookingLinkedMapper.convert(lastBooking));
         assertThat(result.getNextBooking()).isEqualTo(bookingLinkedMapper.convert(nextBooking));
-        assertThat(result.getComments()).asList().isNotEmpty()
-                .contains(commentDtoMapper.convert(comment.withId(expectedCommentId)));
+        assertThat(result.getComments()).asList().isNotEmpty().contains(commentMapper.convert(comment));
         verify(itemRepository, times(1)).findItemById(anyLong());
         verify(userRepository, times(1)).findUserById(anyLong());
         verify(itemRepository, times(1)).findAllItemComments(anyLong());
@@ -319,8 +291,7 @@ public class ItemServiceTest {
     @Test
     @DisplayName("Update existing item by not existing test")
     void updateExistingItemByNotExistingUserTest() throws Exception {
-        when(userRepository.findUserById(anyLong()))
-                .thenThrow(new UserNotFoundException(expectedUserId));
+        when(userRepository.findUserById(anyLong())).thenReturn(null);
         assertThatExceptionOfType(UserNotFoundException.class)
                 .isThrownBy(() -> itemService.updateItem(expectedUserId, expectedItemId, itemDto));
         verify(itemRepository, never()).findItemById(anyLong());
@@ -333,10 +304,8 @@ public class ItemServiceTest {
     @Test
     @DisplayName("Update not existing item test")
     void updateNotExistingItemTest() throws Exception {
-        when(userRepository.findUserById(anyLong()))
-                .thenReturn(user.withId(expectedUserId));
-        when(itemRepository.findItemById(anyLong()))
-                .thenThrow(new ItemNotFoundException(expectedItemId));
+        when(userRepository.findUserById(anyLong())).thenReturn(user);
+        when(itemRepository.findItemById(anyLong())).thenReturn(null);
         assertThatExceptionOfType(ItemNotFoundException.class)
                 .isThrownBy(() -> itemService.updateItem(expectedUserId, expectedItemId, itemDto));
         verify(itemRepository, times(1)).findItemById(anyLong());
@@ -350,10 +319,8 @@ public class ItemServiceTest {
     @DisplayName("Update existing item by wrong owner test")
     void updateExistingItemByWrongOwnerTest() throws Exception {
         Long wrongOwnerId = 99L;
-        when(userRepository.findUserById(anyLong()))
-                .thenReturn(user.withId(wrongOwnerId));
-        when(itemRepository.findItemById(anyLong()))
-                .thenReturn(item.withId(expectedItemId).withOwner(user.withId(expectedUserId)));
+        when(userRepository.findUserById(anyLong())).thenReturn(user.withId(wrongOwnerId));
+        when(itemRepository.findItemById(anyLong())).thenReturn(item.withOwner(user));
         assertThatExceptionOfType(WrongItemOwnerException.class)
                 .isThrownBy(() -> itemService.updateItem(wrongOwnerId, expectedItemId, itemDto));
         verify(itemRepository, times(1)).findItemById(anyLong());
@@ -372,20 +339,13 @@ public class ItemServiceTest {
         Booking nextBooking = booking
                 .withStart(LocalDateTime.of(2043, 1, 1, 2, 0, 0))
                 .withEnd(LocalDateTime.of(2043, 1, 1, 3, 0, 0));
-        when(itemRepository.findItemById(anyLong()))
-                .thenReturn(item.withId(expectedItemId).withOwner(user.withId(expectedUserId)));
-        when(itemRepository.deleteItem(any()))
-                .thenReturn(item.withId(expectedItemId).withOwner(user.withId(expectedUserId)));
-        when(userRepository.findUserById(anyLong()))
-                .thenReturn(user.withId(expectedUserId));
-        when(itemRepository.getLastBookingByItemId(anyLong()))
-                .thenReturn(lastBooking);
-        when(itemRepository.getNextBookingByItemId(anyLong()))
-                .thenReturn(nextBooking);
-        when(itemRepository.findAllItemComments(anyLong()))
-                .thenReturn(Lists.list(comment.withId(expectedCommentId)));
-        when(itemRepository.isUserCommentatorOfItem(anyLong(), anyLong()))
-                .thenReturn(Boolean.FALSE);
+        when(itemRepository.findItemById(anyLong())).thenReturn(item.withOwner(user));
+        when(itemRepository.deleteItem(any())).thenReturn(item.withOwner(user));
+        when(userRepository.findUserById(anyLong())).thenReturn(user);
+        when(itemRepository.getLastBookingByItemId(anyLong())).thenReturn(lastBooking);
+        when(itemRepository.getNextBookingByItemId(anyLong())).thenReturn(nextBooking);
+        when(itemRepository.findAllItemComments(anyLong())).thenReturn(Lists.list(comment));
+        when(itemRepository.isUserCommentatorOfItem(anyLong(), anyLong())).thenReturn(Boolean.FALSE);
         ItemDto result = itemService.deleteItem(expectedUserId, expectedItemId);
         assertThat(result.getId()).isEqualTo(expectedItemId);
         assertThat(result.getName()).isEqualTo(itemDto.getName());
@@ -394,8 +354,7 @@ public class ItemServiceTest {
         assertThat(result.getRequestId()).isEqualTo(itemDto.getRequestId());
         assertThat(result.getLastBooking()).isEqualTo(bookingLinkedMapper.convert(lastBooking));
         assertThat(result.getNextBooking()).isEqualTo(bookingLinkedMapper.convert(nextBooking));
-        assertThat(result.getComments()).asList().isNotEmpty()
-                .contains(commentDtoMapper.convert(comment.withId(expectedCommentId)));
+        assertThat(result.getComments()).asList().isNotEmpty().contains(commentMapper.convert(comment));
         verify(itemRepository, times(1)).findItemById(anyLong());
         verify(userRepository, times(1)).findUserById(anyLong());
         verify(itemRepository, times(1)).findAllItemComments(anyLong());
@@ -406,8 +365,7 @@ public class ItemServiceTest {
     @Test
     @DisplayName("Delete existing item by not existing test")
     void deleteExistingItemByNotExistingUserTest() throws Exception {
-        when(userRepository.findUserById(anyLong()))
-                .thenThrow(new UserNotFoundException(expectedUserId));
+        when(userRepository.findUserById(anyLong())).thenReturn(null);
         assertThatExceptionOfType(UserNotFoundException.class)
                 .isThrownBy(() -> itemService.deleteItem(expectedUserId, expectedItemId));
         verify(itemRepository, never()).findItemById(anyLong());
@@ -420,10 +378,8 @@ public class ItemServiceTest {
     @Test
     @DisplayName("Delete not existing item test")
     void deleteNotExistingItemTest() throws Exception {
-        when(userRepository.findUserById(anyLong()))
-                .thenReturn(user.withId(expectedUserId));
-        when(itemRepository.findItemById(anyLong()))
-                .thenThrow(new ItemNotFoundException(expectedItemId));
+        when(userRepository.findUserById(anyLong())).thenReturn(user);
+        when(itemRepository.findItemById(anyLong())).thenReturn(null);
         assertThatExceptionOfType(ItemNotFoundException.class)
                 .isThrownBy(() -> itemService.deleteItem(expectedUserId, expectedItemId));
         verify(itemRepository, times(1)).findItemById(anyLong());
@@ -437,10 +393,8 @@ public class ItemServiceTest {
     @DisplayName("Delete existing item by wrong owner test")
     void deleteExistingItemByWrongOwnerTest() throws Exception {
         Long wrongOwnerId = 99L;
-        when(userRepository.findUserById(anyLong()))
-                .thenReturn(user.withId(wrongOwnerId));
-        when(itemRepository.findItemById(anyLong()))
-                .thenReturn(item.withId(expectedItemId).withOwner(user.withId(expectedUserId)));
+        when(userRepository.findUserById(anyLong())).thenReturn(user.withId(wrongOwnerId));
+        when(itemRepository.findItemById(anyLong())).thenReturn(item.withOwner(user));
         assertThatExceptionOfType(WrongItemOwnerException.class)
                 .isThrownBy(() -> itemService.deleteItem(wrongOwnerId, expectedItemId));
         verify(itemRepository, times(1)).findItemById(anyLong());
@@ -461,22 +415,16 @@ public class ItemServiceTest {
                 .withEnd(LocalDateTime.of(2043, 1, 1, 3, 0, 0));
         when(itemRepository.findAllItems(anyLong()))
                 .thenReturn(Lists.list(item
-                        .withId(expectedItemId)
-                        .withOwner(user.withId(expectedUserId))
+                        .withOwner(user)
                         .withAvailable(Boolean.TRUE)));
-        when(itemRepository.getLastBookingByItemId(anyLong()))
-                .thenReturn(lastBooking);
-        when(itemRepository.getNextBookingByItemId(anyLong()))
-                .thenReturn(nextBooking);
-        when(itemRepository.findAllItemComments(anyLong()))
-                .thenReturn(Lists.list(comment.withId(expectedCommentId)));
-        when(itemRepository.isUserCommentatorOfItem(anyLong(), anyLong()))
-                .thenReturn(Boolean.FALSE);
+        when(itemRepository.getLastBookingByItemId(anyLong())).thenReturn(lastBooking);
+        when(itemRepository.getNextBookingByItemId(anyLong())).thenReturn(nextBooking);
+        when(itemRepository.findAllItemComments(anyLong())).thenReturn(Lists.list(comment));
+        when(itemRepository.isUserCommentatorOfItem(anyLong(), anyLong())).thenReturn(Boolean.FALSE);
         Collection<ItemDto> result = itemService.getAllItems(expectedUserId, null, null);
         assertThat(result).asList().isNotEmpty().contains(
                 itemDto
-                        .withId(expectedItemId)
-                        .withComments(Lists.list(commentDtoMapper.convert(comment.withId(expectedCommentId))))
+                        .withComments(Lists.list(commentMapper.convert(comment.withId(expectedCommentId))))
                         .withNextBooking(bookingLinkedMapper.convert(nextBooking))
                         .withLastBooking(bookingLinkedMapper.convert(lastBooking))
                         .withAvailable(Boolean.TRUE)
@@ -502,22 +450,16 @@ public class ItemServiceTest {
                 .withEnd(LocalDateTime.of(2043, 1, 1, 3, 0, 0));
         when(itemRepository.findAllItems(anyLong(), any()))
                 .thenReturn(new PageImpl<>(Lists.list(item
-                        .withId(expectedItemId)
                         .withOwner(user.withId(expectedUserId))
                         .withAvailable(Boolean.TRUE))));
-        when(itemRepository.getLastBookingByItemId(anyLong()))
-                .thenReturn(lastBooking);
-        when(itemRepository.getNextBookingByItemId(anyLong()))
-                .thenReturn(nextBooking);
-        when(itemRepository.findAllItemComments(anyLong()))
-                .thenReturn(Lists.list(comment.withId(expectedCommentId)));
-        when(itemRepository.isUserCommentatorOfItem(anyLong(), anyLong()))
-                .thenReturn(Boolean.FALSE);
+        when(itemRepository.getLastBookingByItemId(anyLong())).thenReturn(lastBooking);
+        when(itemRepository.getNextBookingByItemId(anyLong())).thenReturn(nextBooking);
+        when(itemRepository.findAllItemComments(anyLong())).thenReturn(Lists.list(comment));
+        when(itemRepository.isUserCommentatorOfItem(anyLong(), anyLong())).thenReturn(Boolean.FALSE);
         Collection<ItemDto> result = itemService.getAllItems(expectedUserId, from, size);
         assertThat(result).asList().isNotEmpty().contains(
                 itemDto
-                        .withId(expectedItemId)
-                        .withComments(Lists.list(commentDtoMapper.convert(comment.withId(expectedCommentId))))
+                        .withComments(Lists.list(commentMapper.convert(comment.withId(expectedCommentId))))
                         .withNextBooking(bookingLinkedMapper.convert(nextBooking))
                         .withLastBooking(bookingLinkedMapper.convert(lastBooking))
                         .withAvailable(Boolean.TRUE)
@@ -551,12 +493,10 @@ public class ItemServiceTest {
         String text = "test";
         when(itemRepository.searchItem(anyString()))
                 .thenReturn(Lists.list(item
-                        .withId(expectedItemId)
                         .withOwner(user.withId(expectedUserId))
                         .withAvailable(Boolean.TRUE)));
         Collection<ItemDto> result = itemService.searchItem(text, null, null);
-        assertThat(result).asList().isNotEmpty().contains(
-                itemDto.withId(expectedItemId).withAvailable(Boolean.TRUE));
+        assertThat(result).asList().isNotEmpty().contains(itemDto.withAvailable(Boolean.TRUE));
         verify(itemRepository, never()).findItemById(anyLong());
         verify(userRepository, never()).findUserById(anyLong());
         verify(itemRepository, times(1)).searchItem(anyString());
@@ -573,14 +513,11 @@ public class ItemServiceTest {
         String text = "test";
         when(itemRepository.searchItem(anyString(), any()))
                 .thenReturn(new PageImpl<>(Lists.list(item
-                        .withId(expectedItemId)
-                        .withOwner(user.withId(expectedUserId))
+                        .withOwner(user)
                         .withAvailable(Boolean.TRUE))));
-        when(itemRepository.isUserCommentatorOfItem(anyLong(), anyLong()))
-                .thenReturn(Boolean.FALSE);
+        when(itemRepository.isUserCommentatorOfItem(anyLong(), anyLong())).thenReturn(Boolean.FALSE);
         Collection<ItemDto> result = itemService.searchItem(text, from, size);
-        assertThat(result).asList().isNotEmpty().contains(
-                itemDto.withId(expectedItemId).withAvailable(Boolean.TRUE));
+        assertThat(result).asList().isNotEmpty().contains(itemDto.withAvailable(Boolean.TRUE));
         verify(itemRepository, never()).findItemById(anyLong());
         verify(userRepository, never()).findUserById(anyLong());
         verify(itemRepository, times(1)).searchItem(anyString(), any());
@@ -620,17 +557,12 @@ public class ItemServiceTest {
     @Test
     @DisplayName("Create valid comment test")
     void createValidCommentTest() throws Exception {
-        when(userRepository.findUserById(anyLong()))
-                .thenReturn(user.withId(expectedUserId));
-        when(itemRepository.findItemById(anyLong()))
-                .thenReturn(item.withId(expectedItemId));
-        when(itemRepository.createComment(any()))
-                .thenReturn(comment.withId(expectedCommentId).withAuthor(user));
-        when(itemRepository.isUserRealBookerOfItem(anyLong(), anyLong()))
-                .thenReturn(Boolean.TRUE);
-        CommentDto result = itemService
-                .createComment(expectedUserId, expectedItemId, commentDtoMapper.convert(comment));
-        assertThat(result).isEqualTo(commentDtoMapper.convert(comment)
+        when(userRepository.findUserById(anyLong())).thenReturn(user);
+        when(itemRepository.findItemById(anyLong())).thenReturn(item);
+        when(itemRepository.createComment(any())).thenReturn(comment.withAuthor(user));
+        when(itemRepository.isUserRealBookerOfItem(anyLong(), anyLong())).thenReturn(Boolean.TRUE);
+        CommentDto result = itemService.createComment(expectedUserId, expectedItemId, commentMapper.convert(comment));
+        assertThat(result).isEqualTo(commentMapper.convert(comment)
                 .withId(expectedCommentId)
                 .withAuthorName(user.getName()));
         verify(userRepository, times(1)).findUserById(anyLong());
@@ -641,11 +573,10 @@ public class ItemServiceTest {
     @Test
     @DisplayName("Create comment by not existing user test")
     void createCommentByNotExistingUserTest() throws Exception {
-        when(userRepository.findUserById(anyLong()))
-                .thenThrow(new UserNotFoundException(expectedUserId));
+        when(userRepository.findUserById(anyLong())).thenReturn(null);
         assertThatExceptionOfType(UserNotFoundException.class)
                 .isThrownBy(() -> itemService.createComment(
-                        expectedUserId, expectedItemId, commentDtoMapper.convert(comment)));
+                        expectedUserId, expectedItemId, commentMapper.convert(comment)));
         verify(userRepository, times(1)).findUserById(anyLong());
         verify(itemRepository, never()).findItemById(anyLong());
         verify(itemRepository, never()).createComment(any());
@@ -654,13 +585,11 @@ public class ItemServiceTest {
     @Test
     @DisplayName("Create comment for not existing item test")
     void createCommentForNotExistingItemTest() throws Exception {
-        when(userRepository.findUserById(anyLong()))
-                .thenReturn(user.withId(expectedUserId));
-        when(itemRepository.findItemById(anyLong()))
-                .thenThrow(new ItemNotFoundException(expectedItemId));
+        when(userRepository.findUserById(anyLong())).thenReturn(user);
+        when(itemRepository.findItemById(anyLong())).thenReturn(null);
         assertThatExceptionOfType(ItemNotFoundException.class)
                 .isThrownBy(() -> itemService.createComment(
-                        expectedUserId, expectedItemId, commentDtoMapper.convert(comment)));
+                        expectedUserId, expectedItemId, commentMapper.convert(comment)));
         verify(userRepository, times(1)).findUserById(anyLong());
         verify(itemRepository, times(1)).findItemById(anyLong());
         verify(itemRepository, never()).createComment(any());
@@ -670,13 +599,11 @@ public class ItemServiceTest {
     @DisplayName("Create comment by not booker test")
     void createCommentByNotBookerTest() throws Exception {
         Long wrongBookerId = 99L;
-        when(userRepository.findUserById(anyLong()))
-                .thenReturn(user.withId(wrongBookerId));
-        when(itemRepository.findItemById(anyLong()))
-                .thenReturn(item.withId(expectedItemId).withOwner(user.withId(expectedUserId)));
+        when(userRepository.findUserById(anyLong())).thenReturn(user);
+        when(itemRepository.findItemById(anyLong())).thenReturn(item.withOwner(user));
         assertThatExceptionOfType(CommentCreateException.class)
                 .isThrownBy(() -> itemService.createComment(
-                        wrongBookerId, expectedItemId, commentDtoMapper.convert(comment)));
+                        wrongBookerId, expectedItemId, commentMapper.convert(comment)));
         verify(userRepository, times(1)).findUserById(anyLong());
         verify(itemRepository, times(1)).findItemById(anyLong());
         verify(itemRepository, never()).createComment(any());
