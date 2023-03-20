@@ -77,6 +77,8 @@ class ItemServiceTest {
 
     private final Long expectedCommentId = 3L;
 
+    private final PageBuilder pageBuilder;
+
     private final ItemDto itemDto = new ItemDto(
             expectedItemId,
             "test_item_name",
@@ -607,5 +609,22 @@ class ItemServiceTest {
         verify(userRepository, times(1)).findUserById(anyLong());
         verify(itemRepository, times(1)).findItemById(anyLong());
         verify(itemRepository, never()).createComment(any());
+    }
+
+    @Test
+    @DisplayName("Page builder valid page test")
+    void PageBuilderValidPageTest() throws Exception {
+        Integer from = 0;
+        Integer size = 1;
+        assertThat(pageBuilder.build(from, size, null)).isNotNull();
+    }
+
+    @Test
+    @DisplayName("Page builder invalid page test")
+    void PageBuilderInvalidPageTest() throws Exception {
+        Integer from = -1;
+        Integer size = 0;
+        assertThatExceptionOfType(InvalidPaginationParamsException.class)
+                .isThrownBy(() -> pageBuilder.build(from, size, null));
     }
 }

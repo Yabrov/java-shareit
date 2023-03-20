@@ -45,27 +45,9 @@ public class BookingResponseDto implements Serializable {
         return bookingResponseDto;
     }
 
-    public BookingResponseDto withStart(LocalDateTime start) {
-        BookingResponseDto bookingResponseDto = (BookingResponseDto) SerializationUtils.clone(this);
-        bookingResponseDto.setStart(start);
-        return bookingResponseDto;
-    }
-
-    public BookingResponseDto withEnd(LocalDateTime end) {
-        BookingResponseDto bookingResponseDto = (BookingResponseDto) SerializationUtils.clone(this);
-        bookingResponseDto.setEnd(end);
-        return bookingResponseDto;
-    }
-
     public BookingResponseDto withStatus(BookingStatus status) {
         BookingResponseDto bookingResponseDto = (BookingResponseDto) SerializationUtils.clone(this);
         bookingResponseDto.setStatus(status);
-        return bookingResponseDto;
-    }
-
-    public BookingResponseDto withItemDto(ItemDto itemDto) {
-        BookingResponseDto bookingResponseDto = (BookingResponseDto) SerializationUtils.clone(this);
-        bookingResponseDto.setItemDto(itemDto);
         return bookingResponseDto;
     }
 

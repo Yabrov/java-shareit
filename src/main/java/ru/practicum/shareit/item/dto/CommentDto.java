@@ -53,10 +53,4 @@ public class CommentDto implements Serializable {
         commentDto.setAuthorName(authorName);
         return commentDto;
     }
-
-    public CommentDto withCreated(LocalDateTime created) {
-        CommentDto commentDto = (CommentDto) SerializationUtils.clone(this);
-        commentDto.setCreated(created);
-        return commentDto;
-    }
 }

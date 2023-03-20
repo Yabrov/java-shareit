@@ -37,28 +37,4 @@ public class ItemSimpleDto implements Serializable {
         itemDto.setId(id);
         return itemDto;
     }
-
-    public ItemSimpleDto withName(String name) {
-        ItemSimpleDto itemDto = (ItemSimpleDto) SerializationUtils.clone(this);
-        itemDto.setName(name);
-        return itemDto;
-    }
-
-    public ItemSimpleDto withDescription(String description) {
-        ItemSimpleDto itemDto = (ItemSimpleDto) SerializationUtils.clone(this);
-        itemDto.setDescription(description);
-        return itemDto;
-    }
-
-    public ItemSimpleDto withAvailable(Boolean available) {
-        ItemSimpleDto itemDto = (ItemSimpleDto) SerializationUtils.clone(this);
-        itemDto.setAvailable(available);
-        return itemDto;
-    }
-
-    public ItemSimpleDto withRequestId(Long requestId) {
-        ItemSimpleDto itemDto = (ItemSimpleDto) SerializationUtils.clone(this);
-        itemDto.setRequestId(requestId);
-        return itemDto;
-    }
 }

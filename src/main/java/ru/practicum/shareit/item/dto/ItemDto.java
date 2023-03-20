@@ -89,12 +89,6 @@ public class ItemDto implements Serializable {
         return itemDto;
     }
 
-    public ItemDto withRequestId(Long requestId) {
-        ItemDto itemDto = (ItemDto) SerializationUtils.clone(this);
-        itemDto.setRequestId(requestId);
-        return itemDto;
-    }
-
     public ItemDto withComments(Collection<CommentDto> comments) {
         ItemDto itemDto = (ItemDto) SerializationUtils.clone(this);
         itemDto.setComments(comments);

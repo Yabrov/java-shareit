@@ -26,10 +26,4 @@ public class BookingLinkedDto implements Serializable {
         bookingLinkedDto.setId(id);
         return bookingLinkedDto;
     }
-
-    public BookingLinkedDto withBookkerId(Long bookerId) {
-        BookingLinkedDto bookingLinkedDto = (BookingLinkedDto) SerializationUtils.clone(this);
-        bookingLinkedDto.setBookerId(bookerId);
-        return bookingLinkedDto;
-    }
 }
