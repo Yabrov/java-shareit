@@ -71,7 +71,7 @@ import static org.mockito.Mockito.*;
         DatabaseUserRepositoryImpl.class
 })
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
-public class BookingServiceTest {
+class BookingServiceTest {
 
     private final BookingRepository bookingRepository;
 

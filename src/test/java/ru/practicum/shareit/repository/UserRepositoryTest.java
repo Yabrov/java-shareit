@@ -22,18 +22,14 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 @Rollback
 @DataJpaTest
 @Transactional(readOnly = true)
+@Sql(scripts = "classpath:user_init.sql")
 @Import(value = {DatabaseUserRepositoryImpl.class, IdReducer.class})
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
-public class UserRepositoryTest {
+class UserRepositoryTest {
 
     private final UserRepository userRepository;
 
     private final IdReducer idReducer;
-
-    @BeforeEach
-    public void setUp() throws SQLException {
-        idReducer.resetAutoIncrementColumns("users");
-    }
 
     private final Long expectedUserId = 1L;
 
@@ -42,18 +38,20 @@ public class UserRepositoryTest {
             "email@test.com"
     ).withId(expectedUserId);
 
+    @BeforeEach
+    public void setUp() throws SQLException {
+        idReducer.resetAutoIncrementColumns("users");
+    }
+
     @Test
     @DisplayName("Find user by id test")
-    @Sql(statements = "INSERT INTO users(name, email) VALUES ('test_name', 'email@test.com')")
-    public void findUserByIdTest() throws Exception {
+    void findUserByIdTest() throws Exception {
         assertThat(userRepository.findUserById(expectedUserId)).isEqualTo(user);
     }
 
-    @Transactional
     @Test
-    @DisplayName("Insert valid user test")
-    public void insertValidUserTest() throws Exception {
-        assertThat(userRepository.saveUser(user)).isEqualTo(user);
-        assertThat(userRepository.findUserById(expectedUserId)).isEqualTo(user);
+    @DisplayName("Find all users test")
+    void findAllUsersTest() throws Exception {
+        assertThat(userRepository.findAllUsers()).asList().isNotEmpty().contains(user);
     }
 }

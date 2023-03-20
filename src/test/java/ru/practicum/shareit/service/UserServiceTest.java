@@ -34,7 +34,7 @@ import static org.mockito.Mockito.*;
 )
 @MockBean(classes = DatabaseUserRepositoryImpl.class)
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
-public class UserServiceTest {
+class UserServiceTest {
 
     private final UserRepository userRepository;
 

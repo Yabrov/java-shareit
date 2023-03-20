@@ -50,7 +50,7 @@ import static org.mockito.Mockito.*;
         DatabaseUserRepositoryImpl.class
 })
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
-public class ItemRequestServiceTest {
+class ItemRequestServiceTest {
 
     private final ItemRequestService itemRequestService;
 
