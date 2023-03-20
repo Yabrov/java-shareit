@@ -18,6 +18,7 @@ import ru.practicum.shareit.booking.dto.mapper.BookingMapper;
 import ru.practicum.shareit.booking.dto.mapper.BookingRequestMapper;
 import ru.practicum.shareit.booking.exceptions.BookingNotFoundException;
 import ru.practicum.shareit.booking.exceptions.BookingOverlapsException;
+import ru.practicum.shareit.booking.exceptions.BookingStateException;
 import ru.practicum.shareit.booking.exceptions.BookingUpdateException;
 import ru.practicum.shareit.booking.repository.BookingRepository;
 import ru.practicum.shareit.booking.repository.DatabaseBookingRepositoryImpl;
@@ -487,6 +488,22 @@ class BookingServiceTest {
         verify(bookingRepository, never()).findAllBookingsOfUserWithStatus(anyLong(), any(), any());
     }
 
+    @Test
+    @DisplayName("Get all bookings of user with wrong state test")
+    void getAllBookingsOfUserWithWrongStateTest() throws Exception {
+        String wrongState = "XXX";
+        when(userRepository.findUserById(anyLong())).thenReturn(user);
+        assertThatExceptionOfType(BookingStateException.class)
+                .isThrownBy(() -> bookingService.getAllBookingsOfUser(expectedUserId, wrongState, null, null));
+        verify(userRepository, times(1)).findUserById(anyLong());
+        verify(bookingRepository, never()).findAllBookingOfUser(anyLong(), any());
+        verify(bookingRepository, never()).findAllCurrentBookingsOfUser(anyLong(), any());
+        verify(bookingRepository, never()).findAllPastBookingsOfUser(anyLong(), any());
+        verify(bookingRepository, never()).findAllFutureBookingsOfUser(anyLong(), any());
+        verify(bookingRepository, never()).findAllBookingsOfUserWithStatus(anyLong(), any(), any());
+        verify(bookingRepository, never()).findAllBookingsOfUserWithStatus(anyLong(), any(), any());
+    }
+
     @ParameterizedTest
     @DisplayName("Get all bookings of item owner without page test")
     @ValueSource(strings = {"ALL", "CURRENT", "PAST", "FUTURE", "WAITING", "REJECTED"})
@@ -606,6 +623,24 @@ class BookingServiceTest {
         when(itemRepository.findAllItems(anyLong())).thenReturn(List.of(item));
         assertThatExceptionOfType(InvalidPaginationParamsException.class)
                 .isThrownBy(() -> bookingService.getAllBookingsForOwnerItems(expectedUserId, "ALL", from, size));
+        verify(userRepository, times(1)).findUserById(anyLong());
+        verify(itemRepository, times(1)).findAllItems(anyLong());
+        verify(bookingRepository, never()).findAllBookingOfItems(any(), any());
+        verify(bookingRepository, never()).findAllCurrentBookingsOfItems(any(), any());
+        verify(bookingRepository, never()).findAllPastBookingsOfItems(any(), any());
+        verify(bookingRepository, never()).findAllFutureBookingsOfItems(any(), any());
+        verify(bookingRepository, never()).findAllBookingsOfItemsWithStatus(any(), any(), any());
+        verify(bookingRepository, never()).findAllBookingsOfItemsWithStatus(any(), any(), any());
+    }
+
+    @Test
+    @DisplayName("Get all bookings of item owner with wrong page test")
+    void getAllBookingsOfItemWithWrongStateStringTest() throws Exception {
+        String wrongState = "XXX";
+        when(userRepository.findUserById(anyLong())).thenReturn(user);
+        when(itemRepository.findAllItems(anyLong())).thenReturn(List.of(item));
+        assertThatExceptionOfType(BookingStateException.class)
+                .isThrownBy(() -> bookingService.getAllBookingsForOwnerItems(expectedUserId, wrongState, null, null));
         verify(userRepository, times(1)).findUserById(anyLong());
         verify(itemRepository, times(1)).findAllItems(anyLong());
         verify(bookingRepository, never()).findAllBookingOfItems(any(), any());
