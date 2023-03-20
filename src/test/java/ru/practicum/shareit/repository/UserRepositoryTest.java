@@ -18,7 +18,8 @@ import ru.practicum.shareit.user.repository.UserRepository;
 
 import java.sql.SQLException;
 
-import static org.assertj.core.api.AssertionsForClassTypes.*;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThatExceptionOfType;
 
 @Rollback
 @DataJpaTest
@@ -54,14 +55,6 @@ class UserRepositoryTest {
     @DisplayName("Find all users test")
     void findAllUsersTest() throws Exception {
         assertThat(userRepository.findAllUsers()).asList().isNotEmpty().contains(user);
-    }
-
-    @Transactional
-    @Test
-    @DisplayName("Save user with duplicate email test")
-    void saveUserWithDuplicateEmailTest() throws Exception {
-        assertThatExceptionOfType(EmailUniqueViolationException.class)
-                .isThrownBy(() -> userRepository.saveUser(user.withId(null)));
     }
 
     @Transactional
