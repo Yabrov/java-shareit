@@ -12,7 +12,6 @@ import org.springframework.test.context.jdbc.Sql;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.config.IdReducer;
 import ru.practicum.shareit.user.User;
-import ru.practicum.shareit.user.exception.EmailUniqueViolationException;
 import ru.practicum.shareit.user.repository.DatabaseUserRepositoryImpl;
 import ru.practicum.shareit.user.repository.UserRepository;
 
