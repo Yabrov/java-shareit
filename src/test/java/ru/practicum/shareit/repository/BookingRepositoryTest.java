@@ -133,13 +133,13 @@ class BookingRepositoryTest {
 
     @Test
     @DisplayName("Is booking overlaps others false test")
-    void IsBookingOverlapsOthersFalseTest() throws Exception {
+    void isBookingOverlapsOthersFalseTest() throws Exception {
         assertThat(bookingRepository.isBookingOverlapsOthers(booking)).isFalse();
     }
 
     @Test
     @DisplayName("Is booking overlaps others true test")
-    void IsBookingOverlapsOthersTrueTest() throws Exception {
+    void isBookingOverlapsOthersTrueTest() throws Exception {
         Booking overlapsBooking = booking.withStart(LocalDateTime.of(2043, 1, 1, 10, 0, 0));
         assertThat(bookingRepository.isBookingOverlapsOthers(overlapsBooking)).isTrue();
     }
