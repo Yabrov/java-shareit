@@ -613,7 +613,7 @@ class ItemServiceTest {
 
     @Test
     @DisplayName("Page builder valid page test")
-    void PageBuilderValidPageTest() throws Exception {
+    void pageBuilderValidPageTest() throws Exception {
         Integer from = 0;
         Integer size = 1;
         assertThat(pageBuilder.build(from, size, null)).isNotNull();
@@ -621,7 +621,7 @@ class ItemServiceTest {
 
     @Test
     @DisplayName("Page builder invalid page test")
-    void PageBuilderInvalidPageTest() throws Exception {
+    void pageBuilderInvalidPageTest() throws Exception {
         Integer from = -1;
         Integer size = 0;
         assertThatExceptionOfType(InvalidPaginationParamsException.class)
