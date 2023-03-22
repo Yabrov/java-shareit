@@ -26,9 +26,11 @@ import java.util.List;
 )
 public class ItemRequest extends BaseEntity<Long> {
 
-    public ItemRequest(String description,
+    public ItemRequest(Long id,
+                       String description,
                        User requestor,
                        LocalDateTime created) {
+        this.id = id;
         this.description = description;
         this.requestor = requestor;
         this.created = created;
@@ -53,18 +55,12 @@ public class ItemRequest extends BaseEntity<Long> {
     @CreationTimestamp
     private LocalDateTime created;
 
-    @OneToMany(mappedBy = "request", fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "request", fetch = FetchType.EAGER)
     private List<Item> items = new ArrayList<>();
 
     public ItemRequest withId(Long id) {
         ItemRequest itemRequest = (ItemRequest) SerializationUtils.clone(this);
         itemRequest.setId(id);
-        return itemRequest;
-    }
-
-    public ItemRequest withDescription(String description) {
-        ItemRequest itemRequest = (ItemRequest) SerializationUtils.clone(this);
-        itemRequest.setDescription(description);
         return itemRequest;
     }
 

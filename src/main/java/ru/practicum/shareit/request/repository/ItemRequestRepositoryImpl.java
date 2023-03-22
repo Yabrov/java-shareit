@@ -25,7 +25,7 @@ public class ItemRequestRepositoryImpl implements ItemRequestRepository {
 
     @Override
     public ItemRequest getItemRequest(Long requestId) {
-        return itemRequestRepository.findItemRequestById(requestId).orElse(null);
+        return itemRequestRepository.findById(requestId).orElse(null);
     }
 
     @Override
@@ -35,11 +35,11 @@ public class ItemRequestRepositoryImpl implements ItemRequestRepository {
 
     @Override
     public Page<ItemRequest> getAllItemRequests(User requestor, Pageable pageable) {
-        return itemRequestRepository.findAllOthersItemRequests(requestor, pageable);
+        return itemRequestRepository.findAllByRequestorIsNot(requestor, pageable);
     }
 
     @Override
     public Collection<ItemRequest> getAllItemRequests(User requestor) {
-        return itemRequestRepository.findAllOthersItemRequests(requestor);
+        return itemRequestRepository.findAllByRequestorIsNot(requestor);
     }
 }
