@@ -28,11 +28,13 @@ import java.util.List;
 )
 public class Item extends BaseEntity<Long> {
 
-    public Item(String name,
+    public Item(Long id,
+                String name,
                 String description,
                 Boolean available,
                 User owner,
                 ItemRequest request) {
+        this.id = id;
         this.name = name;
         this.description = description;
         this.available = available;
@@ -94,12 +96,6 @@ public class Item extends BaseEntity<Long> {
     public Item withOwner(User owner) {
         Item item = (Item) SerializationUtils.clone(this);
         item.setOwner(owner);
-        return item;
-    }
-
-    public Item withRequest(ItemRequest request) {
-        Item item = (Item) SerializationUtils.clone(this);
-        item.setRequest(request);
         return item;
     }
 }

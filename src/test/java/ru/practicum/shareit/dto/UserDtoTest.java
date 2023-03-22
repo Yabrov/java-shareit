@@ -22,9 +22,10 @@ class UserDtoTest {
     private final Converter<UserDto, User> userDtoMapper;
 
     private final User user = new User(
+            1L,
             "test_name",
             "test_email"
-    ).withId(1L);
+    );
 
     private final UserDto userDto = new UserDto(
             1L,

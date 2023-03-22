@@ -48,8 +48,11 @@ class BookingControllerTest {
     private MockMvc mvc;
 
     private final Long xSharerUserId = 999L;
+
     private final Long expectedBookingId = 1L;
+
     private final Long expectedItemId = 33L;
+
     private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss");
 
     private final ItemDto itemDto = new ItemDto(
@@ -84,11 +87,12 @@ class BookingControllerTest {
             userDto
     );
 
+    private
+
     @Test
     @DisplayName("Create valid booking test")
     void createValidBookingTest() throws Exception {
-        when(bookingService.createBooking(anyLong(), any()))
-                .thenReturn(bookingResponseDto.withId(expectedBookingId));
+        when(bookingService.createBooking(anyLong(), any())).thenReturn(bookingResponseDto);
         mvc.perform(post("/bookings")
                         .header("X-Sharer-User-Id", xSharerUserId)
                         .content(mapper.writeValueAsString(bookingRequestDto))
@@ -261,7 +265,7 @@ class BookingControllerTest {
     @DisplayName("Update booking test")
     void updateBookingTest() throws Exception {
         when(bookingService.updateBooking(anyLong(), anyLong(), anyBoolean()))
-                .thenReturn(bookingResponseDto.withId(expectedBookingId).withStatus(BookingStatus.APPROVED));
+                .thenReturn(bookingResponseDto.withStatus(BookingStatus.APPROVED));
         mvc.perform(patch("/bookings/" + expectedBookingId)
                         .header("X-Sharer-User-Id", xSharerUserId)
                         .queryParam("approved", "true")
@@ -295,8 +299,7 @@ class BookingControllerTest {
     @Test
     @DisplayName("Get booking test")
     void getBookingTest() throws Exception {
-        when(bookingService.getBooking(anyLong(), anyLong()))
-                .thenReturn(bookingResponseDto.withId(expectedBookingId));
+        when(bookingService.getBooking(anyLong(), anyLong())).thenReturn(bookingResponseDto);
         mvc.perform(get("/bookings/" + expectedBookingId)
                         .header("X-Sharer-User-Id", xSharerUserId)
                         .characterEncoding(StandardCharsets.UTF_8)
@@ -315,7 +318,7 @@ class BookingControllerTest {
     @DisplayName("Get all bookings of user test")
     void getAllBookingsOfUserTest() throws Exception {
         when(bookingService.getAllBookingsOfUser(anyLong(), anyString(), anyInt(), anyInt()))
-                .thenReturn(Lists.list(bookingResponseDto.withId(expectedBookingId)));
+                .thenReturn(Lists.list(bookingResponseDto));
         mvc.perform(get("/bookings")
                         .header("X-Sharer-User-Id", xSharerUserId)
                         .queryParam("from", "0")
@@ -337,7 +340,7 @@ class BookingControllerTest {
     @DisplayName("Get all item owner bookings test")
     void getAllItemOwnerBookingsTest() throws Exception {
         when(bookingService.getAllBookingsForOwnerItems(anyLong(), anyString(), anyInt(), anyInt()))
-                .thenReturn(Lists.list(bookingResponseDto.withId(expectedBookingId)));
+                .thenReturn(Lists.list(bookingResponseDto));
         mvc.perform(get("/bookings/owner")
                         .header("X-Sharer-User-Id", xSharerUserId)
                         .queryParam("from", "0")

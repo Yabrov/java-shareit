@@ -26,11 +26,13 @@ import java.time.LocalDateTime;
 )
 public class Booking extends BaseEntity<Long> {
 
-    public Booking(LocalDateTime start,
+    public Booking(Long id,
+                   LocalDateTime start,
                    LocalDateTime end,
                    Item item,
                    User booker,
                    BookingStatus status) {
+        this.id = id;
         this.start = start;
         this.end = end;
         this.item = item;

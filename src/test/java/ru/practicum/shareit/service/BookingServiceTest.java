@@ -121,25 +121,28 @@ class BookingServiceTest {
     );
 
     private final User user = new User(
+            expectedUserId,
             userDto.getName(),
             userDto.getEmail()
-    ).withId(expectedUserId);
+    );
 
     private final Item item = new Item(
+            expectedItemId,
             itemDto.getName(),
             itemDto.getDescription(),
             itemDto.getAvailable(),
             null,
             null
-    ).withId(expectedItemId);
+    );
 
     private final Booking booking = new Booking(
+            expectedBookingId,
             bookingRequestDto.getStart(),
             bookingRequestDto.getEnd(),
             null,
             null,
             BookingStatus.WAITING
-    ).withId(expectedBookingId);
+    );
 
     @Test
     @DisplayName("Create valid booking test")

@@ -40,17 +40,19 @@ class ItemDtoTest {
     private final Converter<CommentDto, Comment> commentDtoMapper;
 
     private final User user = new User(
+            1L,
             "test_name",
             "test_email"
-    ).withId(1L);
+    );
 
     private final Item item = new Item(
+            1L,
             "name",
             "description",
             true,
             null,
             null
-    ).withId(1L);
+    );
 
     private final ItemDto itemDto = new ItemDto(
             1L,
@@ -72,11 +74,12 @@ class ItemDtoTest {
     );
 
     private final Comment comment = new Comment(
+            1L,
             "text",
             user,
             item,
             LocalDateTime.MIN
-    ).withId(1L);
+    );
 
     private final CommentDto commentDto = new CommentDto(
             1L,

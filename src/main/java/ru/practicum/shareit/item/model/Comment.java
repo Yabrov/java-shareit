@@ -23,10 +23,12 @@ import java.time.LocalDateTime;
 )
 public class Comment extends BaseEntity<Long> {
 
-    public Comment(String text,
+    public Comment(Long id,
+                   String text,
                    User author,
                    Item item,
                    LocalDateTime created) {
+        this.id = id;
         this.text = text;
         this.author = author;
         this.item = item;
@@ -62,12 +64,6 @@ public class Comment extends BaseEntity<Long> {
         return comment;
     }
 
-    public Comment withText(String text) {
-        Comment comment = (Comment) SerializationUtils.clone(this);
-        comment.setText(text);
-        return comment;
-    }
-
     public Comment withAuthor(User author) {
         Comment comment = (Comment) SerializationUtils.clone(this);
         comment.setAuthor(author);
@@ -77,12 +73,6 @@ public class Comment extends BaseEntity<Long> {
     public Comment withItem(Item item) {
         Comment comment = (Comment) SerializationUtils.clone(this);
         comment.setItem(item);
-        return comment;
-    }
-
-    public Comment withCreated(LocalDateTime created) {
-        Comment comment = (Comment) SerializationUtils.clone(this);
-        comment.setCreated(created);
         return comment;
     }
 }

@@ -10,15 +10,14 @@ import org.springframework.context.annotation.Import;
 import org.springframework.test.annotation.Rollback;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.transaction.annotation.Transactional;
-import ru.practicum.shareit.config.IdReducer;
 import ru.practicum.shareit.user.User;
 import ru.practicum.shareit.user.repository.DatabaseUserRepositoryImpl;
 import ru.practicum.shareit.user.repository.UserRepository;
+import ru.practicum.shareit.utils.IdReducer;
 
 import java.sql.SQLException;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-import static org.assertj.core.api.AssertionsForClassTypes.assertThatExceptionOfType;
 
 @Rollback
 @DataJpaTest
@@ -35,9 +34,10 @@ class UserRepositoryTest {
     private final Long expectedUserId = 1L;
 
     private final User user = new User(
+            expectedUserId,
             "test_name",
             "email@test.com"
-    ).withId(expectedUserId);
+    );
 
     @BeforeEach
     public void setUp() throws SQLException {
@@ -54,14 +54,5 @@ class UserRepositoryTest {
     @DisplayName("Find all users test")
     void findAllUsersTest() throws Exception {
         assertThat(userRepository.findAllUsers()).asList().isNotEmpty().contains(user);
-    }
-
-    @Transactional
-    @Test
-    @DisplayName("Id reducer test")
-    void idReducerTest() throws Exception {
-        idReducer.resetAutoIncrementColumns("users");
-        assertThatExceptionOfType(Exception.class)
-                .isThrownBy(() -> userRepository.saveUser(user.withId(null).withEmail("another_email")));
     }
 }

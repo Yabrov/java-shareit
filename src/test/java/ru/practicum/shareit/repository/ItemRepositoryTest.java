@@ -12,11 +12,11 @@ import org.springframework.context.annotation.Import;
 import org.springframework.test.annotation.Rollback;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.transaction.annotation.Transactional;
-import ru.practicum.shareit.config.IdReducer;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.repository.DatabaseItemRepositoryImpl;
 import ru.practicum.shareit.item.repository.ItemRepository;
 import ru.practicum.shareit.user.User;
+import ru.practicum.shareit.utils.IdReducer;
 
 import java.sql.SQLException;
 
@@ -39,17 +39,19 @@ class ItemRepositoryTest {
     private final Long expectedItemId = 1L;
 
     private final User owner = new User(
+            expectedOwnerId,
             "test_name_1",
             "email_1@test.com"
-    ).withId(expectedOwnerId);
+    );
 
     private final Item item = new Item(
+            expectedItemId,
             "test_item_name",
             "test_item_description",
             true,
             owner,
             null
-    ).withId(expectedItemId);
+    );
 
     @BeforeEach
     public void setUp() throws SQLException {

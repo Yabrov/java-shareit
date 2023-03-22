@@ -30,10 +30,11 @@ class ItemRequestDtoTest {
     private final Converter<ItemRequestDto, ItemRequest> requestDtoMapper;
 
     private final ItemRequest itemRequest = new ItemRequest(
+            1L,
             "test_description",
             null,
             LocalDateTime.of(2043, 1, 1, 11, 0, 0)
-    ).withId(1L);
+    );
 
     private final ItemRequestDto itemRequestDto = new ItemRequestDto(
             1L,

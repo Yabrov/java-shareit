@@ -11,10 +11,10 @@ import org.springframework.data.domain.Sort;
 import org.springframework.test.annotation.Rollback;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.transaction.annotation.Transactional;
-import ru.practicum.shareit.config.IdReducer;
 import ru.practicum.shareit.request.repository.ItemRequestRepository;
 import ru.practicum.shareit.request.repository.ItemRequestRepositoryImpl;
 import ru.practicum.shareit.user.User;
+import ru.practicum.shareit.utils.IdReducer;
 
 import java.sql.SQLException;
 
@@ -32,10 +32,6 @@ class ItemRequestRepositoryTest {
 
     private final IdReducer idReducer;
 
-    private final Long expectedRequestId = 1L;
-
-    private final Long expectedOwnerId = 1L;
-
     private final Long expectedRequestorId = 2L;
 
     @BeforeEach
@@ -48,6 +44,7 @@ class ItemRequestRepositoryTest {
     @Test
     @DisplayName("Find item request by id test")
     void findItemRequestByIdTest() throws Exception {
+        Long expectedRequestId = 1L;
         assertThat(requestRepository.getItemRequest(expectedRequestId)).isNotNull();
     }
 

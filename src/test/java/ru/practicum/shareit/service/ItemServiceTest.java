@@ -91,19 +91,22 @@ class ItemServiceTest {
     );
 
     private final User user = new User(
+            expectedUserId,
             "test_user_name",
             "test_email@test.domain.com"
-    ).withId(expectedUserId);
+    );
 
     private final Item item = new Item(
+            expectedItemId,
             "test_item_name",
             "test_description",
             false,
             null,
             null
-    ).withId(expectedItemId);
+    );
 
     private final Booking booking = new Booking(
+            1L,
             LocalDateTime.of(2043, 1, 1, 10, 0, 0),
             LocalDateTime.of(2043, 1, 1, 11, 0, 0),
             item.withId(expectedItemId),
@@ -111,12 +114,21 @@ class ItemServiceTest {
             BookingStatus.APPROVED
     );
 
+    private final Booking lastBooking = booking
+            .withStart(LocalDateTime.of(2043, 1, 1, 0, 0, 0))
+            .withEnd(LocalDateTime.of(2043, 1, 1, 1, 0, 0));
+
+    private final Booking nextBooking = booking
+            .withStart(LocalDateTime.of(2043, 1, 1, 2, 0, 0))
+            .withEnd(LocalDateTime.of(2043, 1, 1, 3, 0, 0));
+
     private final Comment comment = new Comment(
+            expectedCommentId,
             "test_text",
             user.withId(expectedUserId),
             item.withId(expectedItemId),
             LocalDateTime.now()
-    ).withId(expectedCommentId);
+    );
 
     @Test
     @DisplayName("Create valid item test")
@@ -196,12 +208,6 @@ class ItemServiceTest {
     @Test
     @DisplayName("Get existing item by owner test")
     void getExistingItemByOwnerTest() throws Exception {
-        Booking lastBooking = booking
-                .withStart(LocalDateTime.of(2043, 1, 1, 0, 0, 0))
-                .withEnd(LocalDateTime.of(2043, 1, 1, 1, 0, 0));
-        Booking nextBooking = booking
-                .withStart(LocalDateTime.of(2043, 1, 1, 2, 0, 0))
-                .withEnd(LocalDateTime.of(2043, 1, 1, 3, 0, 0));
         when(itemRepository.findItemById(anyLong())).thenReturn(item.withOwner(user));
         when(userRepository.findUserById(anyLong())).thenReturn(user);
         when(itemRepository.getLastBookingByItemId(anyLong())).thenReturn(lastBooking);
@@ -254,12 +260,6 @@ class ItemServiceTest {
         String updatedDescription = "updated_description";
         String updatedName = "updated_name";
         Boolean updatedStatus = Boolean.TRUE;
-        Booking lastBooking = booking
-                .withStart(LocalDateTime.of(2043, 1, 1, 0, 0, 0))
-                .withEnd(LocalDateTime.of(2043, 1, 1, 1, 0, 0));
-        Booking nextBooking = booking
-                .withStart(LocalDateTime.of(2043, 1, 1, 2, 0, 0))
-                .withEnd(LocalDateTime.of(2043, 1, 1, 3, 0, 0));
         when(itemRepository.findItemById(anyLong()))
                 .thenReturn(item.withId(expectedItemId).withOwner(user));
         when(itemRepository.updateItem(any()))
@@ -335,12 +335,6 @@ class ItemServiceTest {
     @Test
     @DisplayName("Delete existing item by owner test")
     void deleteExistingItemByOwnerTest() throws Exception {
-        Booking lastBooking = booking
-                .withStart(LocalDateTime.of(2043, 1, 1, 0, 0, 0))
-                .withEnd(LocalDateTime.of(2043, 1, 1, 1, 0, 0));
-        Booking nextBooking = booking
-                .withStart(LocalDateTime.of(2043, 1, 1, 2, 0, 0))
-                .withEnd(LocalDateTime.of(2043, 1, 1, 3, 0, 0));
         when(itemRepository.findItemById(anyLong())).thenReturn(item.withOwner(user));
         when(itemRepository.deleteItem(any())).thenReturn(item.withOwner(user));
         when(userRepository.findUserById(anyLong())).thenReturn(user);
@@ -409,12 +403,6 @@ class ItemServiceTest {
     @Test
     @DisplayName("Get all items by owner without page test")
     void getAllItemsByOwnerWithoutPageTest() throws Exception {
-        Booking lastBooking = booking
-                .withStart(LocalDateTime.of(2043, 1, 1, 0, 0, 0))
-                .withEnd(LocalDateTime.of(2043, 1, 1, 1, 0, 0));
-        Booking nextBooking = booking
-                .withStart(LocalDateTime.of(2043, 1, 1, 2, 0, 0))
-                .withEnd(LocalDateTime.of(2043, 1, 1, 3, 0, 0));
         when(itemRepository.findAllItems(anyLong()))
                 .thenReturn(Lists.list(item
                         .withOwner(user)
@@ -444,12 +432,6 @@ class ItemServiceTest {
     void getAllItemsByOwnerWithValidPageTest() throws Exception {
         Integer from = 0;
         Integer size = 1;
-        Booking lastBooking = booking
-                .withStart(LocalDateTime.of(2043, 1, 1, 0, 0, 0))
-                .withEnd(LocalDateTime.of(2043, 1, 1, 1, 0, 0));
-        Booking nextBooking = booking
-                .withStart(LocalDateTime.of(2043, 1, 1, 2, 0, 0))
-                .withEnd(LocalDateTime.of(2043, 1, 1, 3, 0, 0));
         when(itemRepository.findAllItems(anyLong(), any()))
                 .thenReturn(new PageImpl<>(Lists.list(item
                         .withOwner(user.withId(expectedUserId))

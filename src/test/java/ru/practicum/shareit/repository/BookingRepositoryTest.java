@@ -14,9 +14,9 @@ import ru.practicum.shareit.booking.Booking;
 import ru.practicum.shareit.booking.BookingStatus;
 import ru.practicum.shareit.booking.repository.BookingRepository;
 import ru.practicum.shareit.booking.repository.DatabaseBookingRepositoryImpl;
-import ru.practicum.shareit.config.IdReducer;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.user.User;
+import ru.practicum.shareit.utils.IdReducer;
 
 import java.sql.SQLException;
 import java.time.LocalDateTime;
@@ -41,6 +41,7 @@ class BookingRepositoryTest {
     private final Long expectedItemId = 1L;
 
     private final Booking booking = new Booking(
+            null,
             LocalDateTime.of(2043, 1, 1, 16, 0, 0),
             LocalDateTime.of(2043, 1, 1, 17, 0, 0),
             new Item().withId(expectedItemId),

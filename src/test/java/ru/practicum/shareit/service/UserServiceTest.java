@@ -49,9 +49,10 @@ class UserServiceTest {
     );
 
     private final User user = new User(
+            expectedUserId,
             userDto.getName(),
             userDto.getEmail()
-    ).withId(expectedUserId);
+    );
 
     @Test
     @DisplayName("Create valid user test")

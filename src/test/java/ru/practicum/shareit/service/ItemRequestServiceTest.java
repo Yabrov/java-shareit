@@ -70,15 +70,17 @@ class ItemRequestServiceTest {
     );
 
     private final User user = new User(
+            expectedUserId,
             "test_user_name",
             "test_email@test.domain.com"
-    ).withId(expectedUserId);
+    );
 
     private final ItemRequest itemRequest = new ItemRequest(
+            expectedItemRequestId,
             itemRequestDto.getDescription(),
             user,
             null
-    ).withId(expectedItemRequestId);
+    );
 
     @Test
     @DisplayName("Create valid item request test")

@@ -42,8 +42,12 @@ class ItemControllerTest {
     @Autowired
     private MockMvc mvc;
 
+    private final Long xSharerUserId = 999L;
+
+    private final Long expectedItemId = 1L;
+
     private final ItemDto itemDto = new ItemDto(
-            null,
+            expectedItemId,
             "test_name",
             "test_description",
             Boolean.FALSE,
@@ -60,14 +64,10 @@ class ItemControllerTest {
             LocalDateTime.now()
     );
 
-    private final Long xSharerUserId = 999L;
-    private final Long expectedItemId = 1L;
-
     @Test
     @DisplayName("Create valid item test")
     void createValidItemTest() throws Exception {
-        when(itemService.createItem(anyLong(), any()))
-                .thenReturn(itemDto.withId(expectedItemId));
+        when(itemService.createItem(anyLong(), any())).thenReturn(itemDto);
         mvc.perform(post("/items")
                         .header("X-Sharer-User-Id", xSharerUserId)
                         .content(mapper.writeValueAsString(itemDto))
@@ -159,8 +159,7 @@ class ItemControllerTest {
     @Test
     @DisplayName("Get existing item test")
     void getExistingItemTest() throws Exception {
-        when(itemService.getItem(anyLong(), anyLong()))
-                .thenReturn(itemDto.withId(expectedItemId));
+        when(itemService.getItem(anyLong(), anyLong())).thenReturn(itemDto);
         mvc.perform(get("/items/" + expectedItemId)
                         .header("X-Sharer-User-Id", xSharerUserId)
                         .characterEncoding(StandardCharsets.UTF_8)
@@ -208,8 +207,7 @@ class ItemControllerTest {
     @Test
     @DisplayName("Update existing item test")
     void updateExistingItemTest() throws Exception {
-        when(itemService.updateItem(anyLong(), anyLong(), any()))
-                .thenReturn(itemDto.withId(expectedItemId));
+        when(itemService.updateItem(anyLong(), anyLong(), any())).thenReturn(itemDto);
         mvc.perform(patch("/items/" + expectedItemId)
                         .header("X-Sharer-User-Id", xSharerUserId)
                         .content(mapper.writeValueAsString(itemDto.withId(expectedItemId)))
@@ -279,8 +277,7 @@ class ItemControllerTest {
     @Test
     @DisplayName("Delete existing item test")
     void deleteExistingItemTest() throws Exception {
-        when(itemService.deleteItem(anyLong(), anyLong()))
-                .thenReturn(itemDto.withId(expectedItemId));
+        when(itemService.deleteItem(anyLong(), anyLong())).thenReturn(itemDto);
         mvc.perform(delete("/items/" + expectedItemId)
                         .header("X-Sharer-User-Id", xSharerUserId)
                         .characterEncoding(StandardCharsets.UTF_8)
@@ -343,7 +340,7 @@ class ItemControllerTest {
     @DisplayName("Get all items test")
     void getAllItemsTest() throws Exception {
         when(itemService.getAllItems(anyLong(), any(), any()))
-                .thenReturn(Lists.list(itemDto.withId(expectedItemId)));
+                .thenReturn(Lists.list(itemDto));
         mvc.perform(get("/items")
                         .header("X-Sharer-User-Id", xSharerUserId)
                         .characterEncoding(StandardCharsets.UTF_8)
@@ -381,7 +378,7 @@ class ItemControllerTest {
     @DisplayName("Search items test")
     void searchItemsTest() throws Exception {
         when(itemService.searchItem(anyString(), any(), any()))
-                .thenReturn(Lists.list(itemDto.withId(expectedItemId)));
+                .thenReturn(Lists.list(itemDto));
         mvc.perform(get("/items/search")
                         .header("X-Sharer-User-Id", xSharerUserId)
                         .queryParam("text", "text")

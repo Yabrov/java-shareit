@@ -36,19 +36,18 @@ class UserControllerTest {
     @Autowired
     private MockMvc mvc;
 
+    private final Long expectedUserId = 1L;
+
     private final UserDto userDto = new UserDto(
-            null,
+            expectedUserId,
             "test_name",
             "test_email@test.domain.com"
     );
 
-    private final Long expectedUserId = 1L;
-
     @Test
     @DisplayName("Create valid user test")
     void createValidUserTest() throws Exception {
-        when(userService.createUser(any()))
-                .thenReturn(userDto.withId(expectedUserId));
+        when(userService.createUser(any())).thenReturn(userDto);
         mvc.perform(post("/users")
                         .content(mapper.writeValueAsString(userDto))
                         .characterEncoding(StandardCharsets.UTF_8)
@@ -147,7 +146,7 @@ class UserControllerTest {
     @DisplayName("Update existing user test")
     void updateExistingUserTest() throws Exception {
         when(userService.updateUser(anyLong(), any()))
-                .thenReturn(userDto.withId(expectedUserId).withName("Updated name"));
+                .thenReturn(userDto.withName("Updated name"));
         mvc.perform(patch("/users/" + expectedUserId)
                         .content(mapper.writeValueAsString(userDto))
                         .characterEncoding(StandardCharsets.UTF_8)
@@ -178,8 +177,7 @@ class UserControllerTest {
     @Test
     @DisplayName("Delete existing user test")
     void deleteExistingUserTest() throws Exception {
-        when(userService.deleteUser(anyLong()))
-                .thenReturn(userDto.withId(expectedUserId));
+        when(userService.deleteUser(anyLong())).thenReturn(userDto);
         mvc.perform(delete("/users/" + expectedUserId)
                         .characterEncoding(StandardCharsets.UTF_8)
                         .accept(MediaType.APPLICATION_JSON))

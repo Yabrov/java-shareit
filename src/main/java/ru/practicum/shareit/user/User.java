@@ -23,7 +23,8 @@ import java.util.List;
 @Table(name = "users")
 public class User extends BaseEntity<Long> {
 
-    public User(String name, String email) {
+    public User(Long id, String name, String email) {
+        this.id = id;
         this.name = name;
         this.email = email;
     }
@@ -60,12 +61,6 @@ public class User extends BaseEntity<Long> {
     public User withName(String name) {
         User user = (User) SerializationUtils.clone(this);
         user.setName(name);
-        return user;
-    }
-
-    public User withEmail(String email) {
-        User user = (User) SerializationUtils.clone(this);
-        user.setEmail(email);
         return user;
     }
 }

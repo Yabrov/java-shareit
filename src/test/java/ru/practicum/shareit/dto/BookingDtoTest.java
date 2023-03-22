@@ -43,9 +43,10 @@ class BookingDtoTest {
     private final Converter<Booking, BookingLinkedDto> bookingLinkedDtoMapper;
 
     private final User user = new User(
+            1L,
             "test_name",
             "test_email"
-    ).withId(1L);
+    );
 
     private final UserDto userDto = new UserDto(
             1L,
@@ -54,12 +55,13 @@ class BookingDtoTest {
     );
 
     private final Item item = new Item(
+            1L,
             "name",
             "description",
             true,
             user,
             null
-    ).withId(1L);
+    );
 
     private final ItemDto itemDto = new ItemDto(
             1L,
@@ -73,12 +75,13 @@ class BookingDtoTest {
     );
 
     private final Booking booking = new Booking(
+            1L,
             LocalDateTime.of(2043, 1, 1, 0, 0, 0),
             LocalDateTime.of(2043, 1, 1, 3, 0, 0),
             item,
             user,
             BookingStatus.WAITING
-    ).withId(1L);
+    );
 
     private final BookingRequestDto bookingRequestDto = new BookingRequestDto(
             item.getId(),
