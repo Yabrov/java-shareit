@@ -1,4 +1,4 @@
-package ru.practicum.shareit.config;
+package ru.practicum.shareit.utils;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
