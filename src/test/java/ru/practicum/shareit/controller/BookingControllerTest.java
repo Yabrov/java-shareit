@@ -87,8 +87,6 @@ class BookingControllerTest {
             userDto
     );
 
-    private
-
     @Test
     @DisplayName("Create valid booking test")
     void createValidBookingTest() throws Exception {
