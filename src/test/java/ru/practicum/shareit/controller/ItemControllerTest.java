@@ -7,8 +7,9 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 import ru.practicum.shareit.item.ItemController;
 import ru.practicum.shareit.item.dto.CommentDto;
 import ru.practicum.shareit.item.dto.ItemDto;
@@ -19,30 +20,31 @@ import ru.practicum.shareit.item.service.ItemService;
 import ru.practicum.shareit.request.exceptions.InvalidPaginationParamsException;
 import ru.practicum.shareit.user.exception.UserNotFoundException;
 
-import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.util.Collections;
 
 import static org.hamcrest.Matchers.is;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(controllers = ItemController.class)
-class ItemControllerTest {
+class ItemControllerTest extends AbstractControllerTest {
 
     @Autowired
-    private ObjectMapper mapper;
+    public ItemControllerTest(ObjectMapper mapper, MockMvc mvc) {
+        this.mapper = mapper;
+        this.mvc = mvc;
+    }
 
     @MockBean
     private ItemService itemService;
 
-    @Autowired
-    private MockMvc mvc;
-
-    private final Long xSharerUserId = 999L;
+    @Override
+    protected Long getXSharerUserId() {
+        return 999L;
+    }
 
     private final Long expectedItemId = 1L;
 
@@ -68,12 +70,7 @@ class ItemControllerTest {
     @DisplayName("Create valid item test")
     void createValidItemTest() throws Exception {
         when(itemService.createItem(anyLong(), any())).thenReturn(itemDto);
-        mvc.perform(post("/items")
-                        .header("X-Sharer-User-Id", xSharerUserId)
-                        .content(mapper.writeValueAsString(itemDto))
-                        .characterEncoding(StandardCharsets.UTF_8)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .accept(MediaType.APPLICATION_JSON))
+        performPostRequests("/items", itemDto)
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id", is(expectedItemId), Long.class))
                 .andExpect(jsonPath("$.name", is(itemDto.getName())))
@@ -89,12 +86,7 @@ class ItemControllerTest {
     @Test
     @DisplayName("Create item with empty name test")
     void createItemWithEmptyNameByTest() throws Exception {
-        mvc.perform(post("/items")
-                        .header("X-Sharer-User-Id", xSharerUserId)
-                        .content(mapper.writeValueAsString(itemDto.withName("")))
-                        .characterEncoding(StandardCharsets.UTF_8)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .accept(MediaType.APPLICATION_JSON))
+        performPostRequests("/items", itemDto.withName(""))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.error").exists());
         verify(itemService, never()).createItem(anyLong(), any());
@@ -103,12 +95,7 @@ class ItemControllerTest {
     @Test
     @DisplayName("Create item with null name test")
     void createItemWithNullNameByTest() throws Exception {
-        mvc.perform(post("/items")
-                        .header("X-Sharer-User-Id", xSharerUserId)
-                        .content(mapper.writeValueAsString(itemDto.withName(null)))
-                        .characterEncoding(StandardCharsets.UTF_8)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .accept(MediaType.APPLICATION_JSON))
+        performPostRequests("/items", itemDto.withName(null))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.error").exists());
         verify(itemService, never()).createItem(anyLong(), any());
@@ -117,12 +104,7 @@ class ItemControllerTest {
     @Test
     @DisplayName("Create item with empty description test")
     void createItemWithEmptyDescriptionByTest() throws Exception {
-        mvc.perform(post("/items")
-                        .header("X-Sharer-User-Id", xSharerUserId)
-                        .content(mapper.writeValueAsString(itemDto.withDescription("")))
-                        .characterEncoding(StandardCharsets.UTF_8)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .accept(MediaType.APPLICATION_JSON))
+        performPostRequests("/items", itemDto.withDescription(""))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.error").exists());
         verify(itemService, never()).createItem(anyLong(), any());
@@ -131,12 +113,7 @@ class ItemControllerTest {
     @Test
     @DisplayName("Create item with null description test")
     void createItemWithNullDescriptionByTest() throws Exception {
-        mvc.perform(post("/items")
-                        .header("X-Sharer-User-Id", xSharerUserId)
-                        .content(mapper.writeValueAsString(itemDto.withDescription(null)))
-                        .characterEncoding(StandardCharsets.UTF_8)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .accept(MediaType.APPLICATION_JSON))
+        performPostRequests("/items", itemDto.withDescription(null))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.error").exists());
         verify(itemService, never()).createItem(anyLong(), any());
@@ -145,12 +122,7 @@ class ItemControllerTest {
     @Test
     @DisplayName("Create item with null available test")
     void createItemWithNullAvailableByTest() throws Exception {
-        mvc.perform(post("/items")
-                        .header("X-Sharer-User-Id", xSharerUserId)
-                        .content(mapper.writeValueAsString(itemDto.withAvailable(null)))
-                        .characterEncoding(StandardCharsets.UTF_8)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .accept(MediaType.APPLICATION_JSON))
+        performPostRequests("/items", itemDto.withAvailable(null))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.error").exists());
         verify(itemService, never()).createItem(anyLong(), any());
@@ -160,10 +132,7 @@ class ItemControllerTest {
     @DisplayName("Get existing item test")
     void getExistingItemTest() throws Exception {
         when(itemService.getItem(anyLong(), anyLong())).thenReturn(itemDto);
-        mvc.perform(get("/items/" + expectedItemId)
-                        .header("X-Sharer-User-Id", xSharerUserId)
-                        .characterEncoding(StandardCharsets.UTF_8)
-                        .accept(MediaType.APPLICATION_JSON))
+        performGetRequests("/items/" + expectedItemId, new LinkedMultiValueMap<>())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id", is(expectedItemId), Long.class))
                 .andExpect(jsonPath("$.name", is(itemDto.getName())))
@@ -181,10 +150,7 @@ class ItemControllerTest {
     void getNotExistingItemTest() throws Exception {
         when(itemService.getItem(anyLong(), anyLong()))
                 .thenThrow(new ItemNotFoundException(expectedItemId));
-        mvc.perform(get("/items/" + expectedItemId)
-                        .header("X-Sharer-User-Id", xSharerUserId)
-                        .characterEncoding(StandardCharsets.UTF_8)
-                        .accept(MediaType.APPLICATION_JSON))
+        performGetRequests("/items/" + expectedItemId, new LinkedMultiValueMap<>())
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.error").exists());
         verify(itemService, times(1)).getItem(anyLong(), anyLong());
@@ -194,11 +160,8 @@ class ItemControllerTest {
     @DisplayName("Get item by not existing user test")
     void getItemByNotExistingUserTest() throws Exception {
         when(itemService.getItem(anyLong(), anyLong()))
-                .thenThrow(new UserNotFoundException(xSharerUserId));
-        mvc.perform(get("/items/" + expectedItemId)
-                        .header("X-Sharer-User-Id", xSharerUserId)
-                        .characterEncoding(StandardCharsets.UTF_8)
-                        .accept(MediaType.APPLICATION_JSON))
+                .thenThrow(new UserNotFoundException(getXSharerUserId()));
+        performGetRequests("/items/" + expectedItemId, new LinkedMultiValueMap<>())
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.error").exists());
         verify(itemService, times(1)).getItem(anyLong(), anyLong());
@@ -208,12 +171,7 @@ class ItemControllerTest {
     @DisplayName("Update existing item test")
     void updateExistingItemTest() throws Exception {
         when(itemService.updateItem(anyLong(), anyLong(), any())).thenReturn(itemDto);
-        mvc.perform(patch("/items/" + expectedItemId)
-                        .header("X-Sharer-User-Id", xSharerUserId)
-                        .content(mapper.writeValueAsString(itemDto.withId(expectedItemId)))
-                        .characterEncoding(StandardCharsets.UTF_8)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .accept(MediaType.APPLICATION_JSON))
+        performPatchRequests("/items/" + expectedItemId, itemDto, new LinkedMultiValueMap<>())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id", is(expectedItemId), Long.class))
                 .andExpect(jsonPath("$.name", is(itemDto.getName())))
@@ -230,13 +188,8 @@ class ItemControllerTest {
     @DisplayName("Update item by other user test")
     void updateItemByOtherUserTest() throws Exception {
         when(itemService.updateItem(anyLong(), anyLong(), any()))
-                .thenThrow(new WrongItemOwnerException(xSharerUserId, expectedItemId));
-        mvc.perform(patch("/items/" + expectedItemId)
-                        .header("X-Sharer-User-Id", xSharerUserId)
-                        .content(mapper.writeValueAsString(itemDto.withId(expectedItemId)))
-                        .characterEncoding(StandardCharsets.UTF_8)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .accept(MediaType.APPLICATION_JSON))
+                .thenThrow(new WrongItemOwnerException(getXSharerUserId(), expectedItemId));
+        performPatchRequests("/items/" + expectedItemId, itemDto, new LinkedMultiValueMap<>())
                 .andExpect(status().isForbidden())
                 .andExpect(jsonPath("$.error").exists());
         verify(itemService, times(1)).updateItem(anyLong(), anyLong(), any());
@@ -246,13 +199,8 @@ class ItemControllerTest {
     @DisplayName("Update item by not existing user test")
     void updateItemByNotExistingUserTest() throws Exception {
         when(itemService.updateItem(anyLong(), anyLong(), any()))
-                .thenThrow(new UserNotFoundException(xSharerUserId));
-        mvc.perform(patch("/items/" + expectedItemId)
-                        .header("X-Sharer-User-Id", xSharerUserId)
-                        .content(mapper.writeValueAsString(itemDto.withId(expectedItemId)))
-                        .characterEncoding(StandardCharsets.UTF_8)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .accept(MediaType.APPLICATION_JSON))
+                .thenThrow(new UserNotFoundException(getXSharerUserId()));
+        performPatchRequests("/items/" + expectedItemId, itemDto, new LinkedMultiValueMap<>())
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.error").exists());
         verify(itemService, times(1)).updateItem(anyLong(), anyLong(), any());
@@ -263,12 +211,7 @@ class ItemControllerTest {
     void updateNotExistingItemTest() throws Exception {
         when(itemService.updateItem(anyLong(), anyLong(), any()))
                 .thenThrow(new ItemNotFoundException(expectedItemId));
-        mvc.perform(patch("/items/" + expectedItemId)
-                        .header("X-Sharer-User-Id", xSharerUserId)
-                        .content(mapper.writeValueAsString(itemDto.withId(expectedItemId)))
-                        .characterEncoding(StandardCharsets.UTF_8)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .accept(MediaType.APPLICATION_JSON))
+        performPatchRequests("/items/" + expectedItemId, itemDto, new LinkedMultiValueMap<>())
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.error").exists());
         verify(itemService, times(1)).updateItem(anyLong(), anyLong(), any());
@@ -278,10 +221,7 @@ class ItemControllerTest {
     @DisplayName("Delete existing item test")
     void deleteExistingItemTest() throws Exception {
         when(itemService.deleteItem(anyLong(), anyLong())).thenReturn(itemDto);
-        mvc.perform(delete("/items/" + expectedItemId)
-                        .header("X-Sharer-User-Id", xSharerUserId)
-                        .characterEncoding(StandardCharsets.UTF_8)
-                        .accept(MediaType.APPLICATION_JSON))
+        performDeleteRequests("/items/" + expectedItemId)
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id", is(expectedItemId), Long.class))
                 .andExpect(jsonPath("$.name", is(itemDto.getName())))
@@ -298,25 +238,19 @@ class ItemControllerTest {
     @DisplayName("Delete item by other user test")
     void deleteItemByOtherUserTest() throws Exception {
         when(itemService.deleteItem(anyLong(), anyLong()))
-                .thenThrow(new WrongItemOwnerException(xSharerUserId, expectedItemId));
-        mvc.perform(delete("/items/" + expectedItemId)
-                        .header("X-Sharer-User-Id", xSharerUserId)
-                        .characterEncoding(StandardCharsets.UTF_8)
-                        .accept(MediaType.APPLICATION_JSON))
+                .thenThrow(new WrongItemOwnerException(getXSharerUserId(), expectedItemId));
+        performDeleteRequests("/items/" + expectedItemId)
                 .andExpect(status().isForbidden())
                 .andExpect(jsonPath("$.error").exists());
         verify(itemService, times(1)).deleteItem(anyLong(), anyLong());
     }
 
     @Test
-    @DisplayName("Delte item by not existing user test")
+    @DisplayName("Delete item by not existing user test")
     void deleteItemByNotExistingUserTest() throws Exception {
         when(itemService.deleteItem(anyLong(), anyLong()))
-                .thenThrow(new UserNotFoundException(xSharerUserId));
-        mvc.perform(delete("/items/" + expectedItemId)
-                        .header("X-Sharer-User-Id", xSharerUserId)
-                        .characterEncoding(StandardCharsets.UTF_8)
-                        .accept(MediaType.APPLICATION_JSON))
+                .thenThrow(new UserNotFoundException(getXSharerUserId()));
+        performDeleteRequests("/items/" + expectedItemId)
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.error").exists());
         verify(itemService, times(1)).deleteItem(anyLong(), anyLong());
@@ -327,10 +261,7 @@ class ItemControllerTest {
     void deleteNotExistingItemTest() throws Exception {
         when(itemService.deleteItem(anyLong(), anyLong()))
                 .thenThrow(new ItemNotFoundException(expectedItemId));
-        mvc.perform(delete("/items/" + expectedItemId)
-                        .header("X-Sharer-User-Id", xSharerUserId)
-                        .characterEncoding(StandardCharsets.UTF_8)
-                        .accept(MediaType.APPLICATION_JSON))
+        performDeleteRequests("/items/" + expectedItemId)
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.error").exists());
         verify(itemService, times(1)).deleteItem(anyLong(), anyLong());
@@ -341,10 +272,7 @@ class ItemControllerTest {
     void getAllItemsTest() throws Exception {
         when(itemService.getAllItems(anyLong(), any(), any()))
                 .thenReturn(Lists.list(itemDto));
-        mvc.perform(get("/items")
-                        .header("X-Sharer-User-Id", xSharerUserId)
-                        .characterEncoding(StandardCharsets.UTF_8)
-                        .accept(MediaType.APPLICATION_JSON))
+        performGetRequests("/items", new LinkedMultiValueMap<>())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.size()").value(1))
                 .andExpect(jsonPath("$[0].id", is(expectedItemId), Long.class))
@@ -363,12 +291,10 @@ class ItemControllerTest {
     void getAllItemsWithInvalidPageParamsTest() throws Exception {
         when(itemService.getAllItems(anyLong(), anyInt(), anyInt()))
                 .thenThrow(new InvalidPaginationParamsException(-1, 0));
-        mvc.perform(get("/items")
-                        .header("X-Sharer-User-Id", xSharerUserId)
-                        .queryParam("from", "-1")
-                        .queryParam("size", "0")
-                        .characterEncoding(StandardCharsets.UTF_8)
-                        .accept(MediaType.APPLICATION_JSON))
+        MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
+        params.put("from", Lists.list("-1"));
+        params.put("size", Lists.list("0"));
+        performGetRequests("/items", params)
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.error").exists());
         verify(itemService, times(1)).getAllItems(anyLong(), anyInt(), anyInt());
@@ -379,11 +305,9 @@ class ItemControllerTest {
     void searchItemsTest() throws Exception {
         when(itemService.searchItem(anyString(), any(), any()))
                 .thenReturn(Lists.list(itemDto));
-        mvc.perform(get("/items/search")
-                        .header("X-Sharer-User-Id", xSharerUserId)
-                        .queryParam("text", "text")
-                        .characterEncoding(StandardCharsets.UTF_8)
-                        .accept(MediaType.APPLICATION_JSON))
+        MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
+        params.put("text", Lists.list("text"));
+        performGetRequests("/items/search", params)
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.size()").value(1))
                 .andExpect(jsonPath("$[0].id", is(expectedItemId), Long.class))
@@ -402,11 +326,9 @@ class ItemControllerTest {
     void searchItemsWithEmptyTextParamTest() throws Exception {
         when(itemService.getAllItems(anyLong(), any(), any()))
                 .thenReturn(Collections.emptyList());
-        mvc.perform(get("/items/search")
-                        .header("X-Sharer-User-Id", xSharerUserId)
-                        .queryParam("text", "")
-                        .characterEncoding(StandardCharsets.UTF_8)
-                        .accept(MediaType.APPLICATION_JSON))
+        MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
+        params.put("text", Lists.list(""));
+        performGetRequests("/items/search", params)
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.size()").value(0));
         verify(itemService, times(1)).searchItem(anyString(), any(), any());
@@ -418,12 +340,7 @@ class ItemControllerTest {
         Long expectedCommentId = 1L;
         when(itemService.createComment(anyLong(), anyLong(), any()))
                 .thenReturn(commentDto.withId(expectedCommentId));
-        mvc.perform(post("/items/" + expectedItemId + "/comment")
-                        .header("X-Sharer-User-Id", xSharerUserId)
-                        .content(mapper.writeValueAsString(commentDto))
-                        .characterEncoding(StandardCharsets.UTF_8)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .accept(MediaType.APPLICATION_JSON))
+        performPostRequests("/items/" + expectedItemId + "/comment", commentDto)
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id", is(expectedCommentId), Long.class))
                 .andExpect(jsonPath("$.text", is(commentDto.getText())));
@@ -433,12 +350,7 @@ class ItemControllerTest {
     @Test
     @DisplayName("Create comment with empty text test")
     void createCommentWithEmptyTextTest() throws Exception {
-        mvc.perform(post("/items/" + expectedItemId + "/comment")
-                        .header("X-Sharer-User-Id", xSharerUserId)
-                        .content(mapper.writeValueAsString(commentDto.withText("")))
-                        .characterEncoding(StandardCharsets.UTF_8)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .accept(MediaType.APPLICATION_JSON))
+        performPostRequests("/items/" + expectedItemId + "/comment", commentDto.withText(""))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.error").exists());
         verify(itemService, never()).createComment(anyLong(), anyLong(), any());
@@ -447,12 +359,7 @@ class ItemControllerTest {
     @Test
     @DisplayName("Create comment with null text test")
     void createCommentWithNullTextTest() throws Exception {
-        mvc.perform(post("/items/" + expectedItemId + "/comment")
-                        .header("X-Sharer-User-Id", xSharerUserId)
-                        .content(mapper.writeValueAsString(commentDto.withText(null)))
-                        .characterEncoding(StandardCharsets.UTF_8)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .accept(MediaType.APPLICATION_JSON))
+        performPostRequests("/items/" + expectedItemId + "/comment", commentDto.withText(null))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.error").exists());
         verify(itemService, never()).createComment(anyLong(), anyLong(), any());
@@ -463,12 +370,7 @@ class ItemControllerTest {
     void createCommentByWrongUserTest() throws Exception {
         when(itemService.createComment(anyLong(), anyLong(), any()))
                 .thenThrow(new CommentCreateException("some message"));
-        mvc.perform(post("/items/" + expectedItemId + "/comment")
-                        .header("X-Sharer-User-Id", xSharerUserId)
-                        .content(mapper.writeValueAsString(commentDto))
-                        .characterEncoding(StandardCharsets.UTF_8)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .accept(MediaType.APPLICATION_JSON))
+        performPostRequests("/items/" + expectedItemId + "/comment", commentDto)
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.error").exists());
         verify(itemService, times(1)).createComment(anyLong(), anyLong(), any());

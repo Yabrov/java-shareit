@@ -50,6 +50,13 @@ class UserRepositoryTest {
         assertThat(userRepository.findUserById(expectedUserId)).isEqualTo(user);
     }
 
+    @Transactional
+    @Test
+    @DisplayName("Delete user test")
+    void deleteUserTest() throws Exception {
+        assertThat(userRepository.deleteUser(expectedUserId)).isEqualTo(user);
+    }
+
     @Test
     @DisplayName("Find all users test")
     void findAllUsersTest() throws Exception {

@@ -7,15 +7,15 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 import ru.practicum.shareit.request.ItemRequestController;
 import ru.practicum.shareit.request.dto.ItemRequestDto;
 import ru.practicum.shareit.request.exceptions.ItemRequestNotFoundException;
 import ru.practicum.shareit.request.service.ItemRequestService;
 import ru.practicum.shareit.user.exception.UserNotFoundException;
 
-import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Collections;
@@ -24,24 +24,25 @@ import static org.hamcrest.Matchers.is;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(controllers = ItemRequestController.class)
-class ItemRequestControllerTest {
+class ItemRequestControllerTest extends AbstractControllerTest {
 
     @Autowired
-    private ObjectMapper mapper;
+    public ItemRequestControllerTest(ObjectMapper mapper, MockMvc mvc) {
+        this.mapper = mapper;
+        this.mvc = mvc;
+    }
 
     @MockBean
     private ItemRequestService requestService;
 
-    @Autowired
-    private MockMvc mvc;
-
-    private final Long xSharerUserId = 999L;
+    @Override
+    protected Long getXSharerUserId() {
+        return 999L;
+    }
 
     private final Long expectedRequestId = 33L;
 
@@ -58,12 +59,7 @@ class ItemRequestControllerTest {
     @DisplayName("Create valid item request test")
     void createValidItemRequestTest() throws Exception {
         when(requestService.createItemRequest(anyLong(), any())).thenReturn(itemRequestDto);
-        mvc.perform(post("/requests")
-                        .header("X-Sharer-User-Id", xSharerUserId)
-                        .content(mapper.writeValueAsString(itemRequestDto))
-                        .characterEncoding(StandardCharsets.UTF_8)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .accept(MediaType.APPLICATION_JSON))
+        performPostRequests("/requests", itemRequestDto)
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id", is(expectedRequestId), Long.class))
                 .andExpect(jsonPath("$.description", is(itemRequestDto.getDescription())))
@@ -76,13 +72,8 @@ class ItemRequestControllerTest {
     @DisplayName("Create item request by not existing user test")
     void createItemRequestByNotExistingUserTest() throws Exception {
         when(requestService.createItemRequest(anyLong(), any()))
-                .thenThrow(new UserNotFoundException(xSharerUserId));
-        mvc.perform(post("/requests")
-                        .header("X-Sharer-User-Id", xSharerUserId)
-                        .content(mapper.writeValueAsString(itemRequestDto))
-                        .characterEncoding(StandardCharsets.UTF_8)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .accept(MediaType.APPLICATION_JSON))
+                .thenThrow(new UserNotFoundException(getXSharerUserId()));
+        performPostRequests("/requests", itemRequestDto)
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.error").exists());
         verify(requestService, times(1)).createItemRequest(anyLong(), any());
@@ -91,12 +82,7 @@ class ItemRequestControllerTest {
     @Test
     @DisplayName("Create item request with empty description test")
     void createItemRequestWithEmptyDescriptionTest() throws Exception {
-        mvc.perform(post("/requests")
-                        .header("X-Sharer-User-Id", xSharerUserId)
-                        .content(mapper.writeValueAsString(itemRequestDto.withDescription("")))
-                        .characterEncoding(StandardCharsets.UTF_8)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .accept(MediaType.APPLICATION_JSON))
+        performPostRequests("/requests", itemRequestDto.withDescription(""))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.error").exists());
         verify(requestService, never()).createItemRequest(anyLong(), any());
@@ -105,12 +91,7 @@ class ItemRequestControllerTest {
     @Test
     @DisplayName("Create item request with null description test")
     void createItemRequestWithNullDescriptionTest() throws Exception {
-        mvc.perform(post("/requests")
-                        .header("X-Sharer-User-Id", xSharerUserId)
-                        .content(mapper.writeValueAsString(itemRequestDto.withDescription(null)))
-                        .characterEncoding(StandardCharsets.UTF_8)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .accept(MediaType.APPLICATION_JSON))
+        performPostRequests("/requests", itemRequestDto.withDescription(null))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.error").exists());
         verify(requestService, never()).createItemRequest(anyLong(), any());
@@ -120,10 +101,7 @@ class ItemRequestControllerTest {
     @DisplayName("Get existing item request test")
     void getExistingItemRequestTest() throws Exception {
         when(requestService.getItemRequest(anyLong(), anyLong())).thenReturn(itemRequestDto);
-        mvc.perform(get("/requests/" + expectedRequestId)
-                        .header("X-Sharer-User-Id", xSharerUserId)
-                        .characterEncoding(StandardCharsets.UTF_8)
-                        .accept(MediaType.APPLICATION_JSON))
+        performGetRequests("/requests/" + expectedRequestId, new LinkedMultiValueMap<>())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id", is(expectedRequestId), Long.class))
                 .andExpect(jsonPath("$.description", is(itemRequestDto.getDescription())))
@@ -137,10 +115,7 @@ class ItemRequestControllerTest {
     void getNotExistingItemRequestTest() throws Exception {
         when(requestService.getItemRequest(anyLong(), anyLong()))
                 .thenThrow(new ItemRequestNotFoundException(expectedRequestId));
-        mvc.perform(get("/requests/" + expectedRequestId)
-                        .header("X-Sharer-User-Id", xSharerUserId)
-                        .characterEncoding(StandardCharsets.UTF_8)
-                        .accept(MediaType.APPLICATION_JSON))
+        performGetRequests("/requests/" + expectedRequestId, new LinkedMultiValueMap<>())
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.error").exists());
         verify(requestService, times(1)).getItemRequest(anyLong(), anyLong());
@@ -150,10 +125,7 @@ class ItemRequestControllerTest {
     @DisplayName("Get owner item requests test")
     void getOwnerItemRequestsTest() throws Exception {
         when(requestService.getOwnItemRequests(anyLong())).thenReturn(Lists.list(itemRequestDto));
-        mvc.perform(get("/requests")
-                        .header("X-Sharer-User-Id", xSharerUserId)
-                        .characterEncoding(StandardCharsets.UTF_8)
-                        .accept(MediaType.APPLICATION_JSON))
+        performGetRequests("/requests", new LinkedMultiValueMap<>())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.size()").value(1))
                 .andExpect(jsonPath("$[0].id", is(expectedRequestId), Long.class))
@@ -168,12 +140,10 @@ class ItemRequestControllerTest {
     void getAllItemRequestsTest() throws Exception {
         when(requestService.getAllItemRequests(anyLong(), anyInt(), anyInt()))
                 .thenReturn(Lists.list(itemRequestDto));
-        mvc.perform(get("/requests/all")
-                        .header("X-Sharer-User-Id", xSharerUserId)
-                        .queryParam("from", "0")
-                        .queryParam("size", "1")
-                        .characterEncoding(StandardCharsets.UTF_8)
-                        .accept(MediaType.APPLICATION_JSON))
+        MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
+        params.put("from", Lists.list("0"));
+        params.put("size", Lists.list("1"));
+        performGetRequests("/requests/all", params)
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.size()").value(1))
                 .andExpect(jsonPath("$[0].id", is(expectedRequestId), Long.class))

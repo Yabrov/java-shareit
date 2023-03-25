@@ -7,13 +7,15 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 import ru.practicum.shareit.booking.BookingController;
 import ru.practicum.shareit.booking.BookingStatus;
 import ru.practicum.shareit.booking.dto.BookingRequestDto;
 import ru.practicum.shareit.booking.dto.BookingResponseDto;
 import ru.practicum.shareit.booking.exceptions.BookingOverlapsException;
+import ru.practicum.shareit.booking.exceptions.BookingStateException;
 import ru.practicum.shareit.booking.exceptions.BookingUpdateException;
 import ru.practicum.shareit.booking.service.BookingService;
 import ru.practicum.shareit.item.dto.ItemDto;
@@ -22,7 +24,6 @@ import ru.practicum.shareit.item.exceptions.ItemUnavailableException;
 import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.exception.UserNotFoundException;
 
-import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Collections;
@@ -31,23 +32,25 @@ import static org.hamcrest.Matchers.is;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(controllers = BookingController.class)
-class BookingControllerTest {
+class BookingControllerTest extends AbstractControllerTest {
 
     @Autowired
-    private ObjectMapper mapper;
+    public BookingControllerTest(ObjectMapper mapper, MockMvc mvc) {
+        this.mapper = mapper;
+        this.mvc = mvc;
+    }
 
     @MockBean
     private BookingService bookingService;
 
-    @Autowired
-    private MockMvc mvc;
-
-    private final Long xSharerUserId = 999L;
+    @Override
+    protected Long getXSharerUserId() {
+        return 999L;
+    }
 
     private final Long expectedBookingId = 1L;
 
@@ -91,12 +94,7 @@ class BookingControllerTest {
     @DisplayName("Create valid booking test")
     void createValidBookingTest() throws Exception {
         when(bookingService.createBooking(anyLong(), any())).thenReturn(bookingResponseDto);
-        mvc.perform(post("/bookings")
-                        .header("X-Sharer-User-Id", xSharerUserId)
-                        .content(mapper.writeValueAsString(bookingRequestDto))
-                        .characterEncoding(StandardCharsets.UTF_8)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .accept(MediaType.APPLICATION_JSON))
+        performPostRequests("/bookings", bookingRequestDto)
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id", is(expectedBookingId), Long.class))
                 .andExpect(jsonPath("$.start", is(bookingResponseDto.getStart().format(formatter))))
@@ -110,12 +108,7 @@ class BookingControllerTest {
     @Test
     @DisplayName("Create booking with item id is null test")
     void createBookingWithItemIdIsNullTest() throws Exception {
-        mvc.perform(post("/bookings")
-                        .header("X-Sharer-User-Id", xSharerUserId)
-                        .content(mapper.writeValueAsString(bookingRequestDto.withItemId(null)))
-                        .characterEncoding(StandardCharsets.UTF_8)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .accept(MediaType.APPLICATION_JSON))
+        performPostRequests("/bookings", bookingRequestDto.withItemId(null))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.error").exists());
         verify(bookingService, never()).createBooking(anyLong(), any());
@@ -125,12 +118,7 @@ class BookingControllerTest {
     @DisplayName("Create booking with start in past test")
     void createBookingWithStartInPastTest() throws Exception {
         LocalDateTime pastStart = LocalDateTime.of(1970, 1, 1, 0, 0);
-        mvc.perform(post("/bookings")
-                        .header("X-Sharer-User-Id", xSharerUserId)
-                        .content(mapper.writeValueAsString(bookingRequestDto.withStart(pastStart)))
-                        .characterEncoding(StandardCharsets.UTF_8)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .accept(MediaType.APPLICATION_JSON))
+        performPostRequests("/bookings", bookingRequestDto.withStart(pastStart))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.error").exists());
         verify(bookingService, never()).createBooking(anyLong(), any());
@@ -139,12 +127,7 @@ class BookingControllerTest {
     @Test
     @DisplayName("Create booking with start is null test")
     void createBookingWithStartIsNullTest() throws Exception {
-        mvc.perform(post("/bookings")
-                        .header("X-Sharer-User-Id", xSharerUserId)
-                        .content(mapper.writeValueAsString(bookingRequestDto.withStart(null)))
-                        .characterEncoding(StandardCharsets.UTF_8)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .accept(MediaType.APPLICATION_JSON))
+        performPostRequests("/bookings", bookingRequestDto.withStart(null))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.error").exists());
         verify(bookingService, never()).createBooking(anyLong(), any());
@@ -154,12 +137,7 @@ class BookingControllerTest {
     @DisplayName("Create booking with end in past test")
     void createBookingWithEndInPastTest() throws Exception {
         LocalDateTime pastEnd = LocalDateTime.of(1970, 1, 1, 0, 0);
-        mvc.perform(post("/bookings")
-                        .header("X-Sharer-User-Id", xSharerUserId)
-                        .content(mapper.writeValueAsString(bookingRequestDto.withEnd(pastEnd)))
-                        .characterEncoding(StandardCharsets.UTF_8)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .accept(MediaType.APPLICATION_JSON))
+        performPostRequests("/bookings", bookingRequestDto.withEnd(pastEnd))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.error").exists());
         verify(bookingService, never()).createBooking(anyLong(), any());
@@ -168,12 +146,7 @@ class BookingControllerTest {
     @Test
     @DisplayName("Create booking with end is null test")
     void createBookingWithEndIsNullTest() throws Exception {
-        mvc.perform(post("/bookings")
-                        .header("X-Sharer-User-Id", xSharerUserId)
-                        .content(mapper.writeValueAsString(bookingRequestDto.withEnd(null)))
-                        .characterEncoding(StandardCharsets.UTF_8)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .accept(MediaType.APPLICATION_JSON))
+        performPostRequests("/bookings", bookingRequestDto.withEnd(null))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.error").exists());
         verify(bookingService, never()).createBooking(anyLong(), any());
@@ -184,12 +157,7 @@ class BookingControllerTest {
     void createBookingWithStartAfterEndTest() throws Exception {
         LocalDateTime start = LocalDateTime.of(2043, 1, 1, 1, 0);
         LocalDateTime end = LocalDateTime.of(2043, 1, 1, 0, 0);
-        mvc.perform(post("/bookings")
-                        .header("X-Sharer-User-Id", xSharerUserId)
-                        .content(mapper.writeValueAsString(bookingRequestDto.withStart(start).withEnd(end)))
-                        .characterEncoding(StandardCharsets.UTF_8)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .accept(MediaType.APPLICATION_JSON))
+        performPostRequests("/bookings", bookingRequestDto.withStart(start).withEnd(end))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.error").exists());
         verify(bookingService, never()).createBooking(anyLong(), any());
@@ -200,12 +168,7 @@ class BookingControllerTest {
     void createBookingOverlapsOthersTest() throws Exception {
         when(bookingService.createBooking(anyLong(), any()))
                 .thenThrow(new BookingOverlapsException());
-        mvc.perform(post("/bookings")
-                        .header("X-Sharer-User-Id", xSharerUserId)
-                        .content(mapper.writeValueAsString(bookingRequestDto))
-                        .characterEncoding(StandardCharsets.UTF_8)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .accept(MediaType.APPLICATION_JSON))
+        performPostRequests("/bookings", bookingRequestDto)
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.error").exists());
         verify(bookingService, times(1)).createBooking(anyLong(), any());
@@ -216,12 +179,7 @@ class BookingControllerTest {
     void createBookingOfUnavailableItemTest() throws Exception {
         when(bookingService.createBooking(anyLong(), any()))
                 .thenThrow(new ItemUnavailableException(expectedItemId));
-        mvc.perform(post("/bookings")
-                        .header("X-Sharer-User-Id", xSharerUserId)
-                        .content(mapper.writeValueAsString(bookingRequestDto))
-                        .characterEncoding(StandardCharsets.UTF_8)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .accept(MediaType.APPLICATION_JSON))
+        performPostRequests("/bookings", bookingRequestDto)
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.error").exists());
         verify(bookingService, times(1)).createBooking(anyLong(), any());
@@ -232,12 +190,7 @@ class BookingControllerTest {
     void createBookingOfNotExistingItemTest() throws Exception {
         when(bookingService.createBooking(anyLong(), any()))
                 .thenThrow(new ItemNotFoundException(expectedItemId));
-        mvc.perform(post("/bookings")
-                        .header("X-Sharer-User-Id", xSharerUserId)
-                        .content(mapper.writeValueAsString(bookingRequestDto))
-                        .characterEncoding(StandardCharsets.UTF_8)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .accept(MediaType.APPLICATION_JSON))
+        performPostRequests("/bookings", bookingRequestDto)
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.error").exists());
         verify(bookingService, times(1)).createBooking(anyLong(), any());
@@ -247,13 +200,8 @@ class BookingControllerTest {
     @DisplayName("Create booking from not existing user test")
     void createBookingFromNotExistingUserTest() throws Exception {
         when(bookingService.createBooking(anyLong(), any()))
-                .thenThrow(new UserNotFoundException(xSharerUserId));
-        mvc.perform(post("/bookings")
-                        .header("X-Sharer-User-Id", xSharerUserId)
-                        .content(mapper.writeValueAsString(bookingRequestDto))
-                        .characterEncoding(StandardCharsets.UTF_8)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .accept(MediaType.APPLICATION_JSON))
+                .thenThrow(new UserNotFoundException(getXSharerUserId()));
+        performPostRequests("/bookings", bookingRequestDto)
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.error").exists());
         verify(bookingService, times(1)).createBooking(anyLong(), any());
@@ -264,11 +212,9 @@ class BookingControllerTest {
     void updateBookingTest() throws Exception {
         when(bookingService.updateBooking(anyLong(), anyLong(), anyBoolean()))
                 .thenReturn(bookingResponseDto.withStatus(BookingStatus.APPROVED));
-        mvc.perform(patch("/bookings/" + expectedBookingId)
-                        .header("X-Sharer-User-Id", xSharerUserId)
-                        .queryParam("approved", "true")
-                        .characterEncoding(StandardCharsets.UTF_8)
-                        .accept(MediaType.APPLICATION_JSON))
+        MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
+        params.put("approved", Lists.list("true"));
+        performPatchRequests("/bookings/" + expectedBookingId, bookingRequestDto, params)
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id", is(expectedBookingId), Long.class))
                 .andExpect(jsonPath("$.start", is(bookingResponseDto.getStart().format(formatter))))
@@ -284,11 +230,9 @@ class BookingControllerTest {
     void updateAlreadyApprovedBookingTest() throws Exception {
         when(bookingService.updateBooking(anyLong(), anyLong(), anyBoolean()))
                 .thenThrow(new BookingUpdateException(""));
-        mvc.perform(patch("/bookings/" + expectedBookingId)
-                        .header("X-Sharer-User-Id", xSharerUserId)
-                        .queryParam("approved", "true")
-                        .characterEncoding(StandardCharsets.UTF_8)
-                        .accept(MediaType.APPLICATION_JSON))
+        MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
+        params.put("approved", Lists.list("true"));
+        performPatchRequests("/bookings/" + expectedBookingId, bookingRequestDto, params)
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.error").exists());
         verify(bookingService, times(1)).updateBooking(anyLong(), anyLong(), anyBoolean());
@@ -298,10 +242,7 @@ class BookingControllerTest {
     @DisplayName("Get booking test")
     void getBookingTest() throws Exception {
         when(bookingService.getBooking(anyLong(), anyLong())).thenReturn(bookingResponseDto);
-        mvc.perform(get("/bookings/" + expectedBookingId)
-                        .header("X-Sharer-User-Id", xSharerUserId)
-                        .characterEncoding(StandardCharsets.UTF_8)
-                        .accept(MediaType.APPLICATION_JSON))
+        performGetRequests("/bookings/" + expectedBookingId, new LinkedMultiValueMap<>())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id", is(expectedBookingId), Long.class))
                 .andExpect(jsonPath("$.start", is(bookingResponseDto.getStart().format(formatter))))
@@ -317,12 +258,10 @@ class BookingControllerTest {
     void getAllBookingsOfUserTest() throws Exception {
         when(bookingService.getAllBookingsOfUser(anyLong(), anyString(), anyInt(), anyInt()))
                 .thenReturn(Lists.list(bookingResponseDto));
-        mvc.perform(get("/bookings")
-                        .header("X-Sharer-User-Id", xSharerUserId)
-                        .queryParam("from", "0")
-                        .queryParam("size", "1")
-                        .characterEncoding(StandardCharsets.UTF_8)
-                        .accept(MediaType.APPLICATION_JSON))
+        MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
+        params.put("from", Lists.list("0"));
+        params.put("size", Lists.list("1"));
+        performGetRequests("/bookings", params)
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.size()").value(1))
                 .andExpect(jsonPath("$[0].id", is(expectedBookingId), Long.class))
@@ -339,12 +278,10 @@ class BookingControllerTest {
     void getAllItemOwnerBookingsTest() throws Exception {
         when(bookingService.getAllBookingsForOwnerItems(anyLong(), anyString(), anyInt(), anyInt()))
                 .thenReturn(Lists.list(bookingResponseDto));
-        mvc.perform(get("/bookings/owner")
-                        .header("X-Sharer-User-Id", xSharerUserId)
-                        .queryParam("from", "0")
-                        .queryParam("size", "1")
-                        .characterEncoding(StandardCharsets.UTF_8)
-                        .accept(MediaType.APPLICATION_JSON))
+        MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
+        params.put("from", Lists.list("0"));
+        params.put("size", Lists.list("1"));
+        performGetRequests("/bookings/owner", params)
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.size()").value(1))
                 .andExpect(jsonPath("$[0].id", is(expectedBookingId), Long.class))
@@ -353,6 +290,20 @@ class BookingControllerTest {
                 .andExpect(jsonPath("$[0].status", is(bookingResponseDto.getStatus().name())))
                 .andExpect(jsonPath("$[0].item.id", is(bookingResponseDto.getItemDto().getId()), Long.class))
                 .andExpect(jsonPath("$[0].booker.id", is(bookingResponseDto.getBookerDto().getId()), Long.class));
+        verify(bookingService, times(1)).getAllBookingsForOwnerItems(anyLong(), anyString(), anyInt(), anyInt());
+    }
+
+    @Test
+    @DisplayName("Get all item owner bookings wrong state test")
+    void getAllItemOwnerBookingsWrongStateTest() throws Exception {
+        when(bookingService.getAllBookingsForOwnerItems(anyLong(), anyString(), anyInt(), anyInt()))
+                .thenThrow(new BookingStateException("wrong state"));
+        MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
+        params.put("from", Lists.list("0"));
+        params.put("size", Lists.list("1"));
+        performGetRequests("/bookings/owner", params)
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.error").exists());
         verify(bookingService, times(1)).getAllBookingsForOwnerItems(anyLong(), anyString(), anyInt(), anyInt());
     }
 }
