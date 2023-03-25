@@ -1,6 +1,8 @@
 package ru.practicum.shareit.item.repository;
 
 import org.springframework.context.annotation.Lazy;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.booking.Booking;
@@ -64,8 +66,20 @@ public class DatabaseItemRepositoryImpl implements ItemRepository {
     }
 
     @Override
+    public Page<Item> findAllItems(Long userId, Pageable pageable) {
+        User owner = new User();
+        owner.setId(userId);
+        return itemRepository.findAllByOwner(owner, pageable);
+    }
+
+    @Override
     public Collection<Item> searchItem(String text) {
         return itemRepository.searchItems(text);
+    }
+
+    @Override
+    public Page<Item> searchItem(String text, Pageable pageable) {
+        return itemRepository.searchItems(text, pageable);
     }
 
     @Override
@@ -79,7 +93,7 @@ public class DatabaseItemRepositoryImpl implements ItemRepository {
 
     @Override
     public Booking getLastBookingByItemId(Long itemId) {
-        return bookingRepository.findFirstByItem_IdAndEndIsLessThanEqualAndStatusOrderByEnd(
+        return bookingRepository.findFirstByItem_IdAndStartIsBeforeAndStatusOrderByEndDesc(
                 itemId,
                 LocalDateTime.now(),
                 BookingStatus.APPROVED

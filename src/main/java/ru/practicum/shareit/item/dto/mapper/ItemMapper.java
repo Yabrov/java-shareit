@@ -12,7 +12,8 @@ public class ItemMapper implements Converter<Item, ItemDto> {
 
     @Override
     public ItemDto convert(Item source) {
-        return new ItemDto(
+        return source != null
+                ? new ItemDto(
                 source.getId(),
                 source.getName(),
                 source.getDescription(),
@@ -20,7 +21,7 @@ public class ItemMapper implements Converter<Item, ItemDto> {
                 source.getRequest() != null ? source.getRequest().getId() : null,
                 null,
                 null,
-                new ArrayList<>()
-        );
+                new ArrayList<>())
+                : null;
     }
 }

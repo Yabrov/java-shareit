@@ -3,6 +3,7 @@ package ru.practicum.shareit.request;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.apache.commons.lang.SerializationUtils;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.DynamicUpdate;
 import ru.practicum.shareit.config.BaseEntity;
@@ -19,8 +20,21 @@ import java.util.List;
 @Setter
 @DynamicUpdate
 @NoArgsConstructor
-@Table(name = "requests")
+@Table(
+        name = "requests",
+        indexes = {@Index(name = "requests_owner_id_idx", columnList = "requestor_id")}
+)
 public class ItemRequest extends BaseEntity<Long> {
+
+    public ItemRequest(Long id,
+                       String description,
+                       User requestor,
+                       LocalDateTime created) {
+        this.id = id;
+        this.description = description;
+        this.requestor = requestor;
+        this.created = created;
+    }
 
     @Column(
             name = "description",
@@ -41,6 +55,24 @@ public class ItemRequest extends BaseEntity<Long> {
     @CreationTimestamp
     private LocalDateTime created;
 
-    @OneToMany(mappedBy = "request", fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "request", fetch = FetchType.EAGER)
     private List<Item> items = new ArrayList<>();
+
+    public ItemRequest withId(Long id) {
+        ItemRequest itemRequest = (ItemRequest) SerializationUtils.clone(this);
+        itemRequest.setId(id);
+        return itemRequest;
+    }
+
+    public ItemRequest withRequestor(User requestor) {
+        ItemRequest itemRequest = (ItemRequest) SerializationUtils.clone(this);
+        itemRequest.setRequestor(requestor);
+        return itemRequest;
+    }
+
+    public ItemRequest withCreated(LocalDateTime created) {
+        ItemRequest itemRequest = (ItemRequest) SerializationUtils.clone(this);
+        itemRequest.setCreated(created);
+        return itemRequest;
+    }
 }

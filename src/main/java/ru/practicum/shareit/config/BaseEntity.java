@@ -12,7 +12,7 @@ import java.io.Serializable;
 @Getter
 @Setter
 @MappedSuperclass
-public abstract class BaseEntity<T extends Serializable> implements Serializable {
+public class BaseEntity<T extends Serializable> implements Serializable {
 
     private static final Long serialVersionUID = 1L;
 
@@ -40,9 +40,7 @@ public abstract class BaseEntity<T extends Serializable> implements Serializable
         if (!entity.getClass().equals(this.getClass())) {
             return false;
         }
-        if (id == null || !id.equals(entity.id)) return false;
-
-        return true;
+        return id != null && id.equals(entity.id);
     }
 
     @Override

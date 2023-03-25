@@ -3,6 +3,7 @@ package ru.practicum.shareit.user;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.apache.commons.lang.SerializationUtils;
 import org.hibernate.annotations.DynamicUpdate;
 import ru.practicum.shareit.booking.Booking;
 import ru.practicum.shareit.config.BaseEntity;
@@ -21,6 +22,12 @@ import java.util.List;
 @NoArgsConstructor
 @Table(name = "users")
 public class User extends BaseEntity<Long> {
+
+    public User(Long id, String name, String email) {
+        this.id = id;
+        this.name = name;
+        this.email = email;
+    }
 
     @Column(name = "name", nullable = false)
     private String name;
@@ -44,4 +51,16 @@ public class User extends BaseEntity<Long> {
 
     @OneToMany(mappedBy = "author", fetch = FetchType.LAZY, cascade = CascadeType.REMOVE)
     private List<Comment> comments = new ArrayList<>();
+
+    public User withId(Long id) {
+        User user = (User) SerializationUtils.clone(this);
+        user.setId(id);
+        return user;
+    }
+
+    public User withName(String name) {
+        User user = (User) SerializationUtils.clone(this);
+        user.setName(name);
+        return user;
+    }
 }
