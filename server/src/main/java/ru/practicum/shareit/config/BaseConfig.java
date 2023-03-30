@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.PropertySource;
 import ru.practicum.shareit.booking.BookingState;
 import ru.practicum.shareit.booking.service.provider.BookingProvider;
 
@@ -12,6 +13,7 @@ import java.util.Map;
 
 @Configuration
 @RequiredArgsConstructor
+@PropertySource("classpath:application.properties")
 @ComponentScan("ru.practicum.shareit.booking.service.provider")
 public class BaseConfig {
 

@@ -1,7 +1,6 @@
 package ru.practicum.shareit.user;
 
 import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -24,13 +23,6 @@ public class UserExceptionController {
     @ExceptionHandler(EmailUniqueViolationException.class)
     @ResponseStatus(HttpStatus.CONFLICT)
     public ErrorResponse emailConstraintViolationHandler(EmailUniqueViolationException e) {
-        return new ErrorResponse(e.getMessage());
-    }
-
-    @ResponseBody
-    @ExceptionHandler(MethodArgumentNotValidException.class)
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ErrorResponse validationExceptionHandler(MethodArgumentNotValidException e) {
         return new ErrorResponse(e.getMessage());
     }
 

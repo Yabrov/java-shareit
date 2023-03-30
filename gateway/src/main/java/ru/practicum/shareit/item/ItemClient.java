@@ -46,22 +46,22 @@ public class ItemClient extends BaseClient {
 
     public ResponseEntity<Object> getAllItems(Long userId, Integer from, Integer size) {
         Map<String, Object> parameters = Map.of(
-                "from", from,
-                "size", size
+                "from", from == null ? "" : from,
+                "size", size == null ? "" : size
         );
         return get("?from={from}&size={size}", userId, parameters);
     }
 
     public ResponseEntity<Object> searchItems(Long userId, String text, Integer from, Integer size) {
         Map<String, Object> parameters = Map.of(
-                "text", text,
-                "from", from,
-                "size", size
+                "text", text == null ? "" : text,
+                "from", from == null ? "" : from,
+                "size", size == null ? "" : size
         );
-        return get("?text={text}&from={from}&size={size}", userId, parameters);
+        return get("/search?text={text}&from={from}&size={size}", userId, parameters);
     }
 
     public ResponseEntity<Object> createComment(Long userId, Long itemId, CommentDto requestDto) {
-        return post("/" + itemId + "/comments", userId, requestDto);
+        return post("/" + itemId + "/comment", userId, requestDto);
     }
 }
