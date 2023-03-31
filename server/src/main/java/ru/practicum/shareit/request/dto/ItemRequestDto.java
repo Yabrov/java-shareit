@@ -8,8 +8,6 @@ import lombok.Setter;
 import org.apache.commons.lang.SerializationUtils;
 import ru.practicum.shareit.item.dto.ItemSimpleDto;
 
-import javax.validation.constraints.NotEmpty;
-import javax.validation.constraints.NotNull;
 import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.Collection;
@@ -25,8 +23,6 @@ public class ItemRequestDto implements Serializable {
     @JsonProperty("id")
     private Long id;
 
-    @NotNull
-    @NotEmpty
     @JsonProperty("description")
     private String description;
 
@@ -39,12 +35,6 @@ public class ItemRequestDto implements Serializable {
     public ItemRequestDto withId(Long id) {
         ItemRequestDto requestDto = (ItemRequestDto) SerializationUtils.clone(this);
         requestDto.setId(id);
-        return requestDto;
-    }
-
-    public ItemRequestDto withDescription(String description) {
-        ItemRequestDto requestDto = (ItemRequestDto) SerializationUtils.clone(this);
-        requestDto.setDescription(description);
         return requestDto;
     }
 

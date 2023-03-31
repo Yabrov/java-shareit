@@ -106,64 +106,6 @@ class BookingControllerTest extends AbstractControllerTest {
     }
 
     @Test
-    @DisplayName("Create booking with item id is null test")
-    void createBookingWithItemIdIsNullTest() throws Exception {
-        performPostRequests("/bookings", bookingRequestDto.withItemId(null))
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.error").exists());
-        verify(bookingService, never()).createBooking(anyLong(), any());
-    }
-
-    @Test
-    @DisplayName("Create booking with start in past test")
-    void createBookingWithStartInPastTest() throws Exception {
-        LocalDateTime pastStart = LocalDateTime.of(1970, 1, 1, 0, 0);
-        performPostRequests("/bookings", bookingRequestDto.withStart(pastStart))
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.error").exists());
-        verify(bookingService, never()).createBooking(anyLong(), any());
-    }
-
-    @Test
-    @DisplayName("Create booking with start is null test")
-    void createBookingWithStartIsNullTest() throws Exception {
-        performPostRequests("/bookings", bookingRequestDto.withStart(null))
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.error").exists());
-        verify(bookingService, never()).createBooking(anyLong(), any());
-    }
-
-    @Test
-    @DisplayName("Create booking with end in past test")
-    void createBookingWithEndInPastTest() throws Exception {
-        LocalDateTime pastEnd = LocalDateTime.of(1970, 1, 1, 0, 0);
-        performPostRequests("/bookings", bookingRequestDto.withEnd(pastEnd))
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.error").exists());
-        verify(bookingService, never()).createBooking(anyLong(), any());
-    }
-
-    @Test
-    @DisplayName("Create booking with end is null test")
-    void createBookingWithEndIsNullTest() throws Exception {
-        performPostRequests("/bookings", bookingRequestDto.withEnd(null))
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.error").exists());
-        verify(bookingService, never()).createBooking(anyLong(), any());
-    }
-
-    @Test
-    @DisplayName("Create booking with start after end test")
-    void createBookingWithStartAfterEndTest() throws Exception {
-        LocalDateTime start = LocalDateTime.of(2043, 1, 1, 1, 0);
-        LocalDateTime end = LocalDateTime.of(2043, 1, 1, 0, 0);
-        performPostRequests("/bookings", bookingRequestDto.withStart(start).withEnd(end))
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.error").exists());
-        verify(bookingService, never()).createBooking(anyLong(), any());
-    }
-
-    @Test
     @DisplayName("Create booking overlaps others test")
     void createBookingOverlapsOthersTest() throws Exception {
         when(bookingService.createBooking(anyLong(), any()))

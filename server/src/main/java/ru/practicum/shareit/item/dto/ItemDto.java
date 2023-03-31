@@ -8,14 +8,11 @@ import lombok.Setter;
 import org.apache.commons.lang.SerializationUtils;
 import ru.practicum.shareit.booking.dto.BookingLinkedDto;
 
-import javax.validation.constraints.NotEmpty;
-import javax.validation.constraints.NotNull;
 import java.io.Serializable;
 import java.util.Collection;
 
 @Getter
 @Setter
-@NotNull
 @AllArgsConstructor
 @EqualsAndHashCode
 public class ItemDto implements Serializable {
@@ -25,17 +22,12 @@ public class ItemDto implements Serializable {
     @JsonProperty("id")
     private Long id;
 
-    @NotNull
-    @NotEmpty
     @JsonProperty("name")
     private String name;
 
-    @NotNull
-    @NotEmpty
     @JsonProperty("description")
     private String description;
 
-    @NotNull
     @JsonProperty("available")
     private Boolean available;
 

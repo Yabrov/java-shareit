@@ -42,12 +42,6 @@ public class CommentDto implements Serializable {
         return commentDto;
     }
 
-    public CommentDto withText(String text) {
-        CommentDto commentDto = (CommentDto) SerializationUtils.clone(this);
-        commentDto.setText(text);
-        return commentDto;
-    }
-
     public CommentDto withAuthorName(String authorName) {
         CommentDto commentDto = (CommentDto) SerializationUtils.clone(this);
         commentDto.setAuthorName(authorName);

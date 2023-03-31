@@ -84,51 +84,6 @@ class ItemControllerTest extends AbstractControllerTest {
     }
 
     @Test
-    @DisplayName("Create item with empty name test")
-    void createItemWithEmptyNameByTest() throws Exception {
-        performPostRequests("/items", itemDto.withName(""))
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.error").exists());
-        verify(itemService, never()).createItem(anyLong(), any());
-    }
-
-    @Test
-    @DisplayName("Create item with null name test")
-    void createItemWithNullNameByTest() throws Exception {
-        performPostRequests("/items", itemDto.withName(null))
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.error").exists());
-        verify(itemService, never()).createItem(anyLong(), any());
-    }
-
-    @Test
-    @DisplayName("Create item with empty description test")
-    void createItemWithEmptyDescriptionByTest() throws Exception {
-        performPostRequests("/items", itemDto.withDescription(""))
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.error").exists());
-        verify(itemService, never()).createItem(anyLong(), any());
-    }
-
-    @Test
-    @DisplayName("Create item with null description test")
-    void createItemWithNullDescriptionByTest() throws Exception {
-        performPostRequests("/items", itemDto.withDescription(null))
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.error").exists());
-        verify(itemService, never()).createItem(anyLong(), any());
-    }
-
-    @Test
-    @DisplayName("Create item with null available test")
-    void createItemWithNullAvailableByTest() throws Exception {
-        performPostRequests("/items", itemDto.withAvailable(null))
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.error").exists());
-        verify(itemService, never()).createItem(anyLong(), any());
-    }
-
-    @Test
     @DisplayName("Get existing item test")
     void getExistingItemTest() throws Exception {
         when(itemService.getItem(anyLong(), anyLong())).thenReturn(itemDto);
@@ -345,24 +300,6 @@ class ItemControllerTest extends AbstractControllerTest {
                 .andExpect(jsonPath("$.id", is(expectedCommentId), Long.class))
                 .andExpect(jsonPath("$.text", is(commentDto.getText())));
         verify(itemService, times(1)).createComment(anyLong(), anyLong(), any());
-    }
-
-    @Test
-    @DisplayName("Create comment with empty text test")
-    void createCommentWithEmptyTextTest() throws Exception {
-        performPostRequests("/items/" + expectedItemId + "/comment", commentDto.withText(""))
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.error").exists());
-        verify(itemService, never()).createComment(anyLong(), anyLong(), any());
-    }
-
-    @Test
-    @DisplayName("Create comment with null text test")
-    void createCommentWithNullTextTest() throws Exception {
-        performPostRequests("/items/" + expectedItemId + "/comment", commentDto.withText(null))
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.error").exists());
-        verify(itemService, never()).createComment(anyLong(), anyLong(), any());
     }
 
     @Test
