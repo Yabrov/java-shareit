@@ -166,6 +166,7 @@ public class ItemServiceImpl implements ItemService {
                 .collect(Collectors.toList());
     }
 
+    @Transactional
     @Override
     public CommentDto createComment(Long userId, Long itemId, CommentDto commentDto) {
         User author = userRepository.findUserById(userId);

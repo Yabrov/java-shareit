@@ -115,6 +115,7 @@ public class DatabaseItemRepositoryImpl implements ItemRepository {
         return commentRepository.countAllByItem_IdAndAuthor_Id(itemId, userId) > 0;
     }
 
+    @Transactional
     @Override
     public Comment createComment(Comment comment) {
         return commentRepository.save(comment);
