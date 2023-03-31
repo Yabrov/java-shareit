@@ -26,6 +26,13 @@ abstract class AbstractControllerTest {
                 .accept(MediaType.APPLICATION_JSON));
     }
 
+    protected ResultActions performGetRequests(String url) throws Exception {
+        return mvc.perform(get(url)
+                .header("X-Sharer-User-Id", getXSharerUserId())
+                .characterEncoding(StandardCharsets.UTF_8)
+                .accept(MediaType.APPLICATION_JSON));
+    }
+
     protected <T> ResultActions performPostRequests(String url, T dto) throws Exception {
         return mvc.perform(post(url)
                 .header("X-Sharer-User-Id", getXSharerUserId())

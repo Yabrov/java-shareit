@@ -21,6 +21,7 @@ import ru.practicum.shareit.booking.dto.BookingRequestDto;
 import java.time.LocalDateTime;
 
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.nullValue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.*;
@@ -167,6 +168,17 @@ class BookingControllerTest extends AbstractControllerTest {
     }
 
     @Test
+    @DisplayName("Get all bookings of user without page test")
+    void getAllBookingsOfUserWithoutPageTest() throws Exception {
+        when(bookingClient.getBookings(anyLong(), anyString(), any(), any()))
+                .thenReturn(ResponseEntity.ok().body(Lists.list(bookingRequestDto)));
+        performGetRequests("/bookings")
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.size()").value(1));
+        verify(bookingClient, times(1)).getBookings(anyLong(), anyString(), any(), any());
+    }
+
+    @Test
     @DisplayName("Get all item owner bookings test")
     void getAllItemOwnerBookingsTest() throws Exception {
         when(bookingClient.getBookingsOwner(anyLong(), anyString(), anyInt(), anyInt()))
@@ -178,5 +190,16 @@ class BookingControllerTest extends AbstractControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.size()").value(1));
         verify(bookingClient, times(1)).getBookingsOwner(anyLong(), anyString(), anyInt(), anyInt());
+    }
+
+    @Test
+    @DisplayName("Get all item owner bookings without pagetest")
+    void getAllItemOwnerBookingsWithoutPageTest() throws Exception {
+        when(bookingClient.getBookingsOwner(anyLong(), anyString(), any(), any()))
+                .thenReturn(ResponseEntity.ok().body(Lists.list(bookingResponseDto)));
+        performGetRequests("/bookings/owner")
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.size()").value(1));
+        verify(bookingClient, times(1)).getBookingsOwner(anyLong(), anyString(), any(), any());
     }
 }

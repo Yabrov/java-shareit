@@ -129,4 +129,19 @@ class ItemRequestControllerTest extends AbstractControllerTest {
                 .andExpect(jsonPath("$[0].items", is(itemRequestDto.getItems())));
         verify(requestClient, times(1)).getAllItemRequests(anyLong(), anyInt(), anyInt());
     }
+
+    @Test
+    @DisplayName("Get all item requests without page test")
+    void getAllItemRequestsWithoutPageTest() throws Exception {
+        when(requestClient.getAllItemRequests(anyLong(), any(), any()))
+                .thenReturn(ResponseEntity.ok(Lists.list(itemRequestDto)));
+        performGetRequests("/requests/all")
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.size()").value(1))
+                .andExpect(jsonPath("$[0].id", is(expectedRequestId), Long.class))
+                .andExpect(jsonPath("$[0].description", is(itemRequestDto.getDescription())))
+                .andExpect(jsonPath("$[0].created", is(itemRequestDto.getCreated().format(formatter))))
+                .andExpect(jsonPath("$[0].items", is(itemRequestDto.getItems())));
+        verify(requestClient, times(1)).getAllItemRequests(anyLong(), any(), any());
+    }
 }
