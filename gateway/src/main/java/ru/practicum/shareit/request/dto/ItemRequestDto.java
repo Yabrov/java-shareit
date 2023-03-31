@@ -35,21 +35,9 @@ public class ItemRequestDto implements Serializable {
     @JsonProperty("items")
     private Collection<Object> items;
 
-    public ItemRequestDto withId(Long id) {
-        ItemRequestDto requestDto = (ItemRequestDto) SerializationUtils.clone(this);
-        requestDto.setId(id);
-        return requestDto;
-    }
-
     public ItemRequestDto withDescription(String description) {
         ItemRequestDto requestDto = (ItemRequestDto) SerializationUtils.clone(this);
         requestDto.setDescription(description);
-        return requestDto;
-    }
-
-    public ItemRequestDto withCreated(LocalDateTime created) {
-        ItemRequestDto requestDto = (ItemRequestDto) SerializationUtils.clone(this);
-        requestDto.setCreated(created);
         return requestDto;
     }
 }

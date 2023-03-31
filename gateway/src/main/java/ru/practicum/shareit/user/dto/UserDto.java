@@ -31,12 +31,6 @@ public class UserDto implements Serializable {
     @JsonProperty("email")
     private String email;
 
-    public UserDto withId(Long id) {
-        UserDto userDto = (UserDto) SerializationUtils.clone(this);
-        userDto.setId(id);
-        return userDto;
-    }
-
     public UserDto withName(String name) {
         UserDto userDto = (UserDto) SerializationUtils.clone(this);
         userDto.setName(name);

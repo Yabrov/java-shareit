@@ -44,12 +44,6 @@ public class ItemDto implements Serializable {
     @JsonProperty("comments")
     private Collection<CommentDto> comments;
 
-    public ItemDto withId(Long id) {
-        ItemDto itemDto = (ItemDto) SerializationUtils.clone(this);
-        itemDto.setId(id);
-        return itemDto;
-    }
-
     public ItemDto withName(String name) {
         ItemDto itemDto = (ItemDto) SerializationUtils.clone(this);
         itemDto.setName(name);
@@ -65,12 +59,6 @@ public class ItemDto implements Serializable {
     public ItemDto withAvailable(Boolean available) {
         ItemDto itemDto = (ItemDto) SerializationUtils.clone(this);
         itemDto.setAvailable(available);
-        return itemDto;
-    }
-
-    public ItemDto withComments(Collection<CommentDto> comments) {
-        ItemDto itemDto = (ItemDto) SerializationUtils.clone(this);
-        itemDto.setComments(comments);
         return itemDto;
     }
 }
