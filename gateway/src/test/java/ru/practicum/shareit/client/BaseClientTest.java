@@ -57,7 +57,7 @@ public class BaseClientTest {
     }
 
     @Test
-    void getRequestWithErrorTest() {
+    void getRequestWithErrorAndBodyTest() {
         Map<String, String> body = Map.of("error", "mes");
         Mockito
                 .when(rest.exchange(
@@ -68,6 +68,23 @@ public class BaseClientTest {
                 .thenReturn(ResponseEntity.badRequest().body(body));
         assertThat(baseClient.get("")).isEqualTo(ResponseEntity.badRequest().body(body));
         assertThat(baseClient.get("", 1L)).isEqualTo(ResponseEntity.badRequest().body(body));
+        verify(rest, times(2)).exchange(anyString(),
+                ArgumentMatchers.any(),
+                ArgumentMatchers.<ResponseEntity<Object>>any(),
+                ArgumentMatchers.<Class<Object>>any());
+    }
+
+    @Test
+    void getRequestWithErrorAndWithoutBodyTest() {
+        Mockito
+                .when(rest.exchange(
+                        anyString(),
+                        ArgumentMatchers.any(),
+                        ArgumentMatchers.<ResponseEntity<Object>>any(),
+                        ArgumentMatchers.<Class<Object>>any()))
+                .thenReturn(ResponseEntity.badRequest().build());
+        assertThat(baseClient.get("")).isEqualTo(ResponseEntity.badRequest().build());
+        assertThat(baseClient.get("", 1L)).isEqualTo(ResponseEntity.badRequest().build());
         verify(rest, times(2)).exchange(anyString(),
                 ArgumentMatchers.any(),
                 ArgumentMatchers.<ResponseEntity<Object>>any(),
