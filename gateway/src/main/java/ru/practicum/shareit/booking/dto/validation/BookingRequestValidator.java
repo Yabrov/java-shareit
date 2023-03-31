@@ -14,9 +14,6 @@ public class BookingRequestValidator implements ConstraintValidator<ValidBooking
 
     @Override
     public boolean isValid(BookingRequestDto bookingRequestDto, ConstraintValidatorContext context) {
-        if (bookingRequestDto == null) {
-            return false;
-        }
         if (bookingRequestDto.getStart() == null || bookingRequestDto.getEnd() == null) {
             return false;
         } else {
